@@ -1,0 +1,32 @@
+# ── Secrets [N7] — .env must NEVER be committed ──────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Data provenance: raw benchmarks are large and separately licensed [R2.3] ─
+# Their SHA-256 + sizes live in data.lock, which IS committed, so the ceiling
+# artifact stays verifiable without redistributing gigabytes.
+raw/
+data/*.json
+data/*.jsonl
+
+# ── Run outputs [R6.4] ──────────────────────────────────────────────────────
+# Content-addressed responses are large; the manifest + rows.parquet are the
+# parts that must be versioned for replay.
+results/*/responses/
+results/*/rows.duckdb
+figures/
+
+# ── Tooling caches ──────────────────────────────────────────────────────────
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ── LaTeX / Tectonic ────────────────────────────────────────────────────────
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz

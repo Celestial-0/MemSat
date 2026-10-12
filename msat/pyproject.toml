@@ -1,0 +1,137 @@
+[project]
+name = "msat"
+version = "1.0.0"
+description = "MemSat experimental harness — retrieval depth x context budget in agent long-term memory"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Runtime dependencies. Every pin is a floor + ceiling (PRD §N1): unpinned deps
+# break `make replay`. Versions verified against PyPI on 2026-10-05 and the full
+# set resolved together (81 packages, clean).
+#
+# Traceability: [R#.#] refers to PRD.md requirement groups.
+# ─────────────────────────────────────────────────────────────────────────────
+dependencies = [
+  # ── Config & contracts ────────────────────────────────────────────────────
+  "pydantic>=2.13.5,<3",       # [R1] validated Run Spec / retrieval.yaml models
+  "pyyaml>=6.0.3,<7",          # [R1] YAML configs
+  "jinja2>=3.1.6,<4",          # [R1.2] prompt templates (*.j2)
+  "typer>=0.27.2,<1",          # [§7] CLI surface
+  "rich>=15.0.0,<16",          # [§7] CLI output
+
+  # ── Storage: Parquet is truth, DuckDB is the query layer ────────────────
+  "duckdb>=1.5.6,<2",          # [R6][R9] columnar analysis over rows.parquet
+  "pyarrow>=25.0.1,<26",       # [R6.4] Parquet write/read, schema control
+  "pandas>=3.0.6,<4",          # [R9] tidy condition table
+  "numpy>=2.5.3,<3",           # [R9] numerics, cosine sim
+
+  # ── Streaming ingestion (2.6 GB M-split will not fit in RAM) ────────────
+  "ijson>=3.5.1,<4",           # [R2.1][N2] streaming JSON parser
+  "orjson>=3.12.0,<4",         # [R5.4] fast JSON for the WAL / manifests
+
+  # ── Statistics (PRD §R9.1 mixed-effects logistic + interaction) ─────────
+  "scipy>=1.18.1,<2",          # [R9] distributions, bootstrap, LRT
+  "statsmodels>=0.15.0,<1",    # [R9.1] GEE / BinomialBayesMixedGLM for the
+                                #        random-effect logistic.
+                                #        VERIFIED TRAP: MixedLM is LINEAR and
+                                #        SILENTLY ACCEPTS a 0/1 outcome — no error,
+                                #        just coefficients that cannot mean what
+                                #        they appear to. Use GEE (cluster-robust by
+                                #        question) or BinomialBayesMixedGLM instead.
+
+  # ── GPU: embeddings + local reader/judge (RTX 4060, sm_89, 8 GB) ────────
+  "torch>=2.14.1,<3",          # [R1.1] embedder + local reader #2  [CUDA index below]
+  "sentence-transformers>=6.1.0,<7",   # [R1.1] session embedder (E)
+  "transformers>=5.18.0,<6",   # [R1.1] local open-weight reader/judge (R7.5)
+  "accelerate>=1.15.0,<2",     # [R7.5] device_map for the local reader
+  "huggingface-hub>=1.31.0,<2", # [R1.1] pinned model resolution. CAPPED <2.0 by
+                                #        sentence-transformers 6.1.0. transformers
+                                #        5.18 alone would allow <3.0, so this is the
+                                #        binding constraint — verified by `uv lock`.
+  "tokenizers>=0.23.2,<1",     # [R1.1] pinned tokenizer
+  "scikit-learn>=1.9.1,<2",    # [R9.10] leakage classifier (AUROC assertion)
+
+  # ── Figures: Plotly only (matplotlib deliberately excluded) ─────────────
+  "plotly>=7.1.0,<8",          # [R10.2] every figure
+  "kaleido>=1.4.0,<2",         # [R10.2] static PDF/SVG export for LaTeX.
+                                #        v1 requires Chrome — FOUND on this machine.
+                                #        Run `uv run kaleido_get_chrome` if it moves.
+
+  # ── LLM API clients (R5.4 retries, R8 judges, R7 readers) ───────────────
+  "anthropic>=1.11.0,<2",      # [R7.6][R8.2] reader family A + judges
+  "openai>=3.24.0,<4",         # [R7.6][R8.2] optional second API family
+  "httpx>=0.28.1,<1",          # [R5.3] async HTTP under the rate limiter
+  "tenacity>=9.1.4,<10",       # [R5.4] retry + backoff
+  "tqdm>=4.70.1,<5",           # [§5] progress
+  "psutil>=7.2.2,<8",          # [N2] RAM/disk accounting for the streaming budget
+]
+
+[project.optional-dependencies]
+# [R9.1] A true nested GLMM with a proper likelihood. statsmodels' GEE and
+# BinomialBayesMixedGLM are approximations for the binomial case; if the
+# interaction model needs an exact GLMM, PyMC provides it. Kept optional so the
+# default install stays light.
+glmm = ["pymc>=5.20.0,<6", "arviz>=0.20.0,<1"]
+
+[project.scripts]
+msat = "msat:main"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PyTorch CUDA index. Driver on this machine is 617.14 (>= R595 required by
+# CUDA 13.2). GPU is an RTX 4060 Laptop, compute capability 8.9 (sm_89).
+# `explicit = true` means torch is pulled ONLY from this index and never from
+# PyPI — which would otherwise install a CPU-only wheel.
+# ─────────────────────────────────────────────────────────────────────────────
+[[tool.uv.index]]
+name = "pytorch-cu132"
+url = "https://download.pytorch.org/whl/cu132"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu132" }
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dev / test toolchain (PRD §5 acceptance criteria, §11 build order)
+# ─────────────────────────────────────────────────────────────────────────────
+[dependency-groups]
+dev = [
+  "pytest>=9.1.1,<10",
+  "pytest-asyncio>=1.4.0,<2",
+  "pytest-cov>=7.1.0,<8",
+  "pytest-timeout>=2.4.0,<3",   # [N2] streaming tests must not hang
+  "ruff>=0.16.10,<1",
+  "mypy>=2.4.0,<3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q --strict-markers --timeout=600"
+markers = [
+  "slow: full-grid tests; excluded from the default smoke run",
+  "network: requires an API key; excluded by default",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "C4", "SIM", "RUF"]
+ignore = ["E501"]  # line length is handled by the formatter
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+# The mixed-effects fit is genuinely dynamic; stubs are not worth the friction.
+[[tool.mypy.overrides]]
+module = ["sentence_transformers.*", "transformers.*", "pymc.*", "arviz.*"]
+ignore_missing_imports = true
