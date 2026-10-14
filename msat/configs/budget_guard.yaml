@@ -1,0 +1,33 @@
+# configs/budget_guard.yaml — the hard spend and disk ceilings (PRD §N4, §N8).
+#
+# PRD §N8: the plan-time cost estimate must FAIL LOUDLY if it exceeds
+# budget.max_usd. No partial factorial may be launched silently.
+
+schema_version: 1
+
+# ── BLOCKER B7 ────────────────────────────────────────────────────────────────
+# The approved budget was set for a 1-FACTOR sweep. This design is a K x B grid
+# x 2 scales x 2 readers — roughly 2-4x the calls. The number below is therefore
+# UNSET, and `max_usd_status` says so explicitly so that an estimate can never
+# masquerade as an approved ceiling.
+#
+# `design-power` still emits a full cost ESTIMATE without this: that estimate is
+# precisely the input to the budget conversation. It then exits non-zero
+# (EXIT_BUDGET_UNSET) because the guard cannot be enforced.
+max_usd: null
+max_usd_status: pending_guide_signoff
+
+# PRD §R6.4: declare a disk budget BEFORE the run. M-scale responses run to
+# ~1.2M tokens each; measured in P1 at 4.84M characters per M question, the
+# crossed grid over both scales and both readers is the dominant term.
+# P4 enforces this by aborting rather than filling the disk.
+disk_budget_bytes: 53687091200  # 50 GiB — ESTIMATE, not a measured requirement
+disk_budget_status: estimated
+
+# PRD §R5.3: rate limiting and the concurrency ceiling are config values, and
+# concurrency is RECORDED in the run manifest because it affects latency — and
+# queue-wait is separated from server time so queueing cannot pollute the
+# latency signal we report.
+max_concurrency: 4
+rate_limit_rpm: 60
+retry_max_attempts: 5

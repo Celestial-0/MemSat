@@ -1,0 +1,167 @@
+# configs/pricing/latest.yaml — cost and COMPUTE budget (PRD §R9.8, §N4, §N8).
+#
+# ⚠️ NO PAID API IN THIS DESIGN. Every reader and every judge is local, so the
+# dollar cost of the main grid is $0.
+#
+# That does not make the budget irrelevant — it MOVES it. The binding constraint
+# is now GPU wall-clock time on a single RTX 4060, and PRD §N4/N8's "hard ceiling"
+# becomes a compute-time ceiling rather than a USD ceiling. `design-power`
+# reports both, because a $0 budget with an unestimated runtime is exactly how a
+# 3-week compute bill arrives in week 8.
+
+_snapshot_date: "2026-10-12"
+_verified_against_invoice: false
+_currency: USD
+_unit: per_1M_tokens
+
+# ── Cost models: local only ───────────────────────────────────────────────────
+# Local inference has no marginal API cost. It is NOT free — it occupies the GPU
+# that embeddings need (P3) and the reader's own wall-clock (P5) — so the compute
+# budget below is the real currency.
+models:
+  # ⚠️ These keys MUST match `model` in readers.yaml exactly. They did not before
+  # 2026-10-13: they were the three nonexistent repo ids, so `estimate_cost`
+  # matched no reader and silently reported every cell UNPRICED. A pricing table
+  # that does not line up with the reader panel fails open, which is the worst
+  # direction - the run proceeds and the cost conversation happens on $0.
+  google/gemma-4-E4B-it:
+    provider: local
+    input: 0.0
+    output: 0.0
+    cache_read: 0.0
+    cache_write: 0.0
+    context_window: 131072
+
+  Qwen/Qwen3.5-9B:
+    provider: local
+    input: 0.0
+    output: 0.0
+    cache_read: 0.0
+    cache_write: 0.0
+    context_window: 262144
+
+  microsoft/Phi-4-mini-instruct:
+    provider: local
+    input: 0.0
+    output: 0.0
+    cache_read: 0.0
+    cache_write: 0.0
+    context_window: 131072
+
+# ── Judges (PRD §R8.2, §R8.6) ─────────────────────────────────────────────────
+# ⚠️ THE BIGGEST COST IN THIS DESIGN IS NOW THE JUDGE PANEL.
+#
+# R8.2 requires >= 2 judges on **ALL** outputs. With a paid API that is an
+# afterthought; with three local readers it is 2 x 126,000 = 252,000 extra local
+# generations, plus R8.6's two-pass replication on top. Judges are not a
+# rounding error here — they are comparable in volume to the experiment itself,
+# and at 9B on one consumer GPU they may well dominate the schedule.
+#
+# `judges_local` names WHICH local models judge. Using the same weights as the
+# reader weakens independence (a judge that shares the reader's blind spots
+# cannot adjudicate them), so the panel deliberately spans two families and the
+# primary reader is NOT its own judge.
+judges_local:
+  - id: judge_1
+    model: Qwen/Qwen3-9B
+    rationale: >-
+      Different family from the primary reader. R8.2 wants at least one judge
+      independent of the reader.
+  - id: judge_2
+    model: microsoft/Phi-4-mini
+    rationale: >-
+      Second family. Weaker than judge_1, which is acceptable and informative:
+      R8.7's kappa-vs-human agreement is exactly the measurement that tells you
+      whether the weaker judge is usable.
+
+judge:
+  input_tokens_approx: 4000   # answer + question + rubric
+  output_tokens: 100
+  judges_per_output: 2
+  # PRD §R8.6 — the two-pass same-judge replication measures our own
+  # judge-noise floor on our own benchmark. It is a second full pass over a
+  # deterministic system, so it is priced as one.
+  reliability_audit_multiplier: 1.0
+
+# ── Token sizes (MEASURED in P1, not a pricing artefact) ─────────────────────
+# These drive the cost AND the context-feasibility check. They were measured by
+# streaming the real corpus, so they survive the move to an all-local design —
+# nothing about them is tied to a provider.
+#
+# Source: `results/dataset_report.json` — 4.84M characters per M question
+# (measured), ~4 characters per English token. Real token counts need the
+# tokenizer pinned in `retrieval.yaml` and are produced in P3; until then these
+# are estimates anchored to a measurement, and are labelled as such.
+token_estimates:
+  # MEASURED corpus values from P1 (results/dataset_report.json). These are the
+  # PRIMARY inputs: content(K) = min(K, sessions_mean) * tokens_per_session.
+  #
+  # The `prompt_tokens_at_*` anchors below are LEGACY. They were order-of-magnitude
+  # placeholders written before P1 measured anything, and two of the four are more
+  # than 2x off the corpus P1 actually measured:
+  #
+  #   S: 489,297 chars/question / 47.73 sessions = 10,250 chars per session
+  #   M: 4,838,071 chars/question / 475.31 sessions = 10,179 chars per session
+  #
+  # S and M sessions are the same size to within 0.7%, yet the S anchors claimed a
+  # 10x difference - which is why S-scale feasibility was computed from a corpus
+  # that does not exist. `tests/test_token_anchors.py` pins this failure
+  # deliberately: it must be fixed with a real tokenizer measurement on the
+  # execution box, not by editing a constant until a test goes green.
+  #
+  # `chars_per_token: 4.0` is an ASSUMPTION (English BPE). The S discrepancy is an
+  # order of magnitude so it survives any plausible ratio, but the derived values
+  # still need confirming against the real tokenizer.
+  chars_per_token: 4.0
+
+  S:
+    sessions_mean: 47.73         # measured - S SATURATES its corpus at this K
+    chars_per_question: 489297   # measured by P1
+    tokens_per_session: 2563     # chars_per_question / sessions_mean / chars_per_token
+    corpus_tokens: 122324
+    prompt_tokens_at_K1: 400      # LEGACY - ~6x too low, unused by the measured path
+    prompt_tokens_at_K64: 12000   # LEGACY - ~10x too low, unused by the measured path
+    output_tokens: 80
+
+  M:
+    sessions_mean: 475.31        # measured - K=64 reaches only 13% of this corpus
+    chars_per_question: 4838071  # measured by P1
+    tokens_per_session: 2545
+    corpus_tokens: 1209518
+    prompt_tokens_at_K1: 2000     # LEGACY - within tolerance, unused by the measured path
+    prompt_tokens_at_K64: 120000  # LEGACY - within tolerance, unused by the measured path
+    output_tokens: 80
+
+# ── Compute budget (the real constraint) ─────────────────────────────────────
+# Assumptions are stated so the guide can challenge them rather than accept a
+# number. Throughput figures are ORDER-OF-MAGNITUDE estimates for a 9B model at
+# 4-bit on an RTX 4060 (sm_89, 8 GB VRAM) with batched HF `transformers`
+# generation; they are NOT measured on this machine and must be benchmarked
+# before P5.
+compute_budget:
+  hardware: "NVIDIA RTX 4060 Laptop, sm_89, 8 GB VRAM, 32 GB system RAM"
+  dtype: 4bit
+  batch_size: 8
+
+  throughput_assumed:
+    prefill_tokens_per_sec: 8000      # GPU-bound, mostly weight-bound matmuls
+    decode_tokens_per_sec: 300        # AGGREGATE across the batch, not per-stream
+
+  prompt_tokens:
+    # S-scale prompts are small. M-scale K=64 is ~120k — measured in P1 at
+    # 4.84M characters per M question.
+    S: { K1: 400, K16: 4000, K64: 12000 }
+    M: { K1: 2000, K16: 20000, K64: 120000 }
+
+  output_tokens:
+    reader: 80
+    judge: 100
+
+  # Hard ceiling on wall-clock. PRD §N4: a hard ceiling per run, enforced, with a
+  # per-cell breakdown — otherwise "we ran out of time" is discovered in week 8.
+  max_wall_clock_hours: 336   # 14 days on one continuous GPU
+
+  # Cacheability. With local weights there is no provider cache, so EVERY call is
+  # a full prefill. PRD §R6.1's content-addressed store still dedupes identical
+  # requests, which is the only reuse available.
+  cacheable_prefix: false

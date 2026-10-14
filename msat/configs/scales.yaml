@@ -1,0 +1,63 @@
+# configs/scales.yaml - the ONE ScaleProfile registry (PRD §R1.3, Architecture §P3.3).
+#
+# The scale factor is S x M. Registering it here is what stops the two from being
+# silently confused, which is the failure the factor exists to prevent.
+#
+# THE NUMBERS, AS MEASURED IN P1 (results/dataset_report.json)
+#   S: 47.73 sessions/question, 489,297 chars  -> 10,250 chars per session
+#   M: 475.31 sessions/question, 4,838,071 chars -> 10,179 chars per session
+#   FACTOR = 9.957x sessions
+#
+# READ THAT LAST LINE CAREFULLY. M is NOT ten times bigger *per conversation* —
+# it is ten times bigger because it has ten times as many sessions. The SESSION is
+# the same size (10,250 vs 10,179 chars, within 0.7%). Two consequences, and both
+# have already cost time:
+#
+#   1. A token budget in ABSOLUTE terms is not comparable across scales, which is
+#      why `B` moved to `per_memory_tokens` (a budget per memory means the same
+#      thing at both scales).
+#   2. `K` DOES differ in what it means. K=32 is 67% of an S conversation and 7%
+#      of an M one, so the same K is a different condition on each scale. The
+#      design crosses scale deliberately, and this file is where the size of that
+#      crossing is stated rather than left to be rediscovered.
+#
+# `factor_vs_reference` is ASSERTED against the measured means on load. If someone
+# edits a `sessions_mean` without updating the factor, validation fails loudly
+# instead of the design quietly drifting.
+
+schema_version: 1
+
+# The scale every other scale is measured against. `factor_vs_reference: 1.0`.
+reference_scale: S
+
+scales:
+  - id: S
+    label: small
+    corpus_fraction_target: 0.2
+    # Fraction of the full benchmark corpus this scale draws from. Recorded
+    # because `corpus_fraction` is a declared covariate in the primary model
+    # (PRD §R9.1) and its range must be known before it can be modelled.
+    sessions_mean: 47.73
+    sessions_median: 48.0
+    sessions_min: 38
+    sessions_max: 62
+    chars_per_question: 489297
+    factor_vs_reference: 1.0
+
+  - id: M
+    label: medium
+    corpus_fraction_target: 0.8
+    sessions_mean: 475.31
+    sessions_median: 476.0
+    sessions_min: 460
+    sessions_max: 490
+    chars_per_question: 4838071
+    factor_vs_reference: 9.957
+
+# Every guard and every cell reports its scale. A number without its scale is not
+# interpretable here: the two differ by an order of magnitude in corpus size and by
+# <1% in session size, so "K=16" and "16k tokens" mean completely different things
+# depending on which one you are looking at.
+reporting:
+  scale_is_mandatory_in_labels: true
+  never_pool_across_scales_without_normalising: true

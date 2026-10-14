@@ -1,0 +1,154 @@
+# configs/readers.yaml - reader families (PRD §R7.5, §R7.6).
+#
+# ALL READERS ARE LOCAL. There is no paid API reader in this design. That is a
+# legitimate choice - it removes API cost, removes provider drift as a confound,
+# and makes every run reproducible offline - but it moves the binding constraint
+# from MONEY to COMPUTE TIME, and the numbers below say how much.
+#
+# PRD §R7.5 requires >= 2 families; three are declared.
+#
+# ⚠️ THE PREVIOUS PANEL WAS THREE NONEXISTENT MODELS. Every repo id in the prior
+# revision was a plausible-sounding guess, and all three failed against the
+# HuggingFace API:
+#
+#   google/gemma-4-9b        401 - there is no Gemma 4 9B (the family is 12B,
+#                             26B-A4B, 31B, E4B, E2B)
+#   Qwen/Qwen3-9B            401 - not present; the current 9B is Qwen3.5-9B
+#   microsoft/Phi-4-mini     401 - the real repo is `Phi-4-mini-instruct`
+#
+# A gated model returns 200 with `gated: manual` (verified with
+# google/gemma-2-9b-it), so 401 means absent, not restricted. These were never
+# caught because `version` said UNCONFIRMED and validate-config exits 2 - which
+# is the whole argument for making that an ERROR rather than a warning.
+#
+# CHECKPOINTS BELOW WERE FETCHED FROM THE HF API ON 2026-10-13. The `version`
+# field is the commit SHA of the repo at that moment, not a tag: tags get
+# repointed, which would silently change the weights under a fixed config_hash.
+
+schema_version: 1
+
+families:
+  # ── primary ─────────────────────────────────────────────────────────────────
+  # Long-context capability comes from a SMALL model with few KV heads, not a big
+  # one. `gemma-4-12B-it` (48 layers x 8 kv_heads x head_dim 256) needs 375 MB per
+  # 1k tokens and can hold only a ~2.5k-token prompt on an 8 GB card, despite
+  # declaring a 262k window. E4B needs 82 MB per 1k and reaches ~66k.
+  - id: gemma
+    provider: local
+    model: google/gemma-4-E4B-it
+    version: ee0ef6023621cff504d758262d4e04895a5af4a2
+    released: "2026-07-20"
+    role: primary
+    reader_strength: 0.78
+    context_window: 131072
+    rationale: >-
+      Only local candidate with enough KV headroom to serve the deepest cells:
+      82 MB per 1k tokens gives a ~66k-token ceiling on the RTX 4060, against
+      ~20k for Qwen3.5-9B and ~44k for Phi. Note that the ORIGINAL config named a
+      12B checkpoint as primary on the theory that "stronger at long-context" is a
+      model-size property. It is not - it is a KV-cache-arithmetic property, and
+      the 12B variant is unusable on 8 GB.
+    exact_checkpoint_confirmed: true
+    vram:
+      params_b: 4.0
+      layers: 42
+      kv_heads: 2
+      head_dim: 256
+      bytes_per_param: 0.55
+
+  # ── secondary ───────────────────────────────────────────────────────────────
+  - id: qwen
+    provider: local
+    model: Qwen/Qwen3.5-9B
+    version: c202236235762e1c871ad0ccb60c8ee5ba337b9a
+    released: "2026-03-02"
+    role: secondary
+    reader_strength: 0.80
+    context_window: 262144
+    rationale: >-
+      Second family, genuinely different pretraining corpus, tokenizer, and
+      alignment - which is what R7.5 asks for. A second checkpoint of the same
+      family would test seed noise, not reader-strength dependence. Strongest
+      reader in the panel, which is deliberate: 2606.21807 found compression gain
+      DECREASES with reader baseline, so the panel needs a strong end for that
+      covariate to have range.
+      ⚠️ head_dim 256 with 9B of weights leaves only ~2.5 GB of VRAM for KV cache,
+      so this reader's ceiling is ~20k tokens and it will drop the deepest cells.
+      That is a hardware fact, not a defect in the model.
+    exact_checkpoint_confirmed: true
+    vram:
+      params_b: 9.0
+      layers: 32
+      kv_heads: 4
+      head_dim: 256
+      bytes_per_param: 0.55
+
+  # ── secondary ───────────────────────────────────────────────────────────────
+  - id: phi
+    provider: local
+    model: microsoft/Phi-4-mini-instruct
+    version: cfbefacb99257ffa30c83adab238a50856ac3083
+    released: "2025-12-10"
+    role: secondary
+    reader_strength: 0.72
+    context_window: 131072
+    rationale: >-
+      Third family, smallest model, and the only PLAIN-TEXT one - the other two
+      are `ForConditionalGeneration` and carry a vision tower this benchmark
+      never uses. Included as the WEAK end of the reader-strength range:
+      2606.21807's finding is that compression gain shrinks as the reader gets
+      stronger, so a curve that never crosses two very different reader strengths
+      cannot test that. Declared 131k with longrope scaling, but its practical
+      ceiling on this card is ~44k tokens.
+    exact_checkpoint_confirmed: true
+    vram:
+      params_b: 3.8
+      layers: 32
+      kv_heads: 8
+      head_dim: 128
+      bytes_per_param: 0.55
+
+# ── THE REAL CEILING IS VRAM, NOT THE DECLARED WINDOW ─────────────────────────
+# Every family above declares 131k-262k tokens of context. None of them can
+# deliver it on an RTX 4060 with 8 GB of VRAM, because the weights have to be
+# resident first and the KV cache grows with the prompt:
+#
+#   capacity = (vram_gb - weight_gb - overhead_gb) / kv_mb_per_1k * 1000
+#
+#   gemma  2.2 GB weights,  82 MB/1k -> ~66,160 tokens
+#   qwen   5.0 GB weights, 125 MB/1k -> ~20,889 tokens
+#   phi    2.1 GB weights, 125 MB/1k -> ~44,318 tokens
+#
+# `context_feasibility` checks BOTH and reports which one bound, per cell. A
+# window-only check finds nothing wrong and then OOMs during P5.
+#
+# CONSEQUENCE FOR THE GRID: the deepest cells are not runnable on all three
+# readers. That is not a bug to be fixed by dropping the reader - R7.5 requires
+# three - it is what an unbalanced panel on one consumer GPU looks like, and the
+# analysis must treat depth as a per-reader variable rather than assuming a
+# common support.
+
+context_policy:
+  # A prompt that exceeds the reader's ceiling is a DIFFERENT question, so the
+  # cell is rejected rather than truncated (PRD §R3.2).
+  on_overflow: reject_cell
+  never_truncate_silently: true
+  require_context_window_ge_prompt: true
+  # ALSO check the VRAM ceiling. Omitting this marked 15 cells infeasible for the
+  # wrong reason and would have marked every long cell feasible.
+
+quantisation:
+  # A 9B model in bf16 is ~18 GB of weights. The RTX 4060 has 8 GB of VRAM, so
+  # bf16 REQUIRES CPU offload into system RAM. That works, and it is roughly
+  # 5-10x slower than a resident GPU fit.
+  default_dtype: 4bit
+  fallback_dtype: bfloat16
+  offload_to_cpu: true
+  # PRD §R6.4: quantisation is a recorded experimental variable, not a free
+  # choice - it changes the weights and therefore the answers.
+  record_in_manifest: true
+  # 4-bit requires `bitsandbytes`, which is an OPTIONAL extra (`bits`). It is
+  # Windows-hostile and unnecessary if a serving engine handles quantisation, so
+  # the backend falls back EXPLICITLY and records the dtype actually used on every
+  # result. A silent fallback would double the memory footprint and change the
+  # answers with nothing to say so.

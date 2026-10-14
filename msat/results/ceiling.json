@@ -1,0 +1,584 @@
+{
+  "_key_semantics": {
+    "analytic_saturation_k": "K* = min{K : ceiling(K) >= 0.995}. Beyond it, no retriever can add evidence; all change is reader-side.",
+    "ceiling": "Pr(|answer_session_ids| <= K) — max recall@K for a PERFECT retriever.",
+    "corpus_fraction_ratio": "K / |corpus| per question. 1.0 means full-context.",
+    "degeneracy_fraction[K]": "Fraction of questions with K >= their own corpus size. Degenerate = the condition has silently become full-context.",
+    "partial": "Mean fraction of evidence retrievable within K.",
+    "survivors_at": "Fraction of questions whose corpus has >= K sessions. NOT 'fraction degenerate' — the complement is, and is emitted as degeneracy_fraction."
+  },
+  "_provenance": {
+    "api_calls": 0,
+    "float_dp": 6,
+    "generator": "msat ceiling",
+    "grid": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      12,
+      16,
+      24,
+      32,
+      48,
+      64
+    ],
+    "saturation_tol": 0.005,
+    "source": "answer_session_ids + has_answer, from the cleaned official release"
+  },
+  "scale_invariance": {
+    "analytic_saturation_k_by_scale": {
+      "M": 6,
+      "S": 6
+    },
+    "ceiling_by_scale": {
+      "M": {
+        "1": 0.361702,
+        "12": 1.0,
+        "16": 1.0,
+        "2": 0.848936,
+        "24": 1.0,
+        "3": 0.931915,
+        "32": 1.0,
+        "4": 0.970213,
+        "48": 1.0,
+        "6": 1.0,
+        "64": 1.0,
+        "8": 1.0
+      },
+      "S": {
+        "1": 0.361702,
+        "12": 1.0,
+        "16": 1.0,
+        "2": 0.848936,
+        "24": 1.0,
+        "3": 0.931915,
+        "32": 1.0,
+        "4": 0.970213,
+        "48": 1.0,
+        "6": 1.0,
+        "64": 1.0,
+        "8": 1.0
+      }
+    },
+    "identical_across_scales": true
+  },
+  "scales": {
+    "M": {
+      "_key_semantics": {
+        "analytic_saturation_k": "K* = min{K : ceiling(K) >= 0.995}. Beyond it, no retriever can add evidence; all change is reader-side.",
+        "ceiling": "Pr(|answer_session_ids| <= K) — max recall@K for a PERFECT retriever.",
+        "corpus_fraction_ratio": "K / |corpus| per question. 1.0 means full-context.",
+        "degeneracy_fraction[K]": "Fraction of questions with K >= their own corpus size. Degenerate = the condition has silently become full-context.",
+        "partial": "Mean fraction of evidence retrievable within K.",
+        "survivors_at": "Fraction of questions whose corpus has >= K sessions. NOT 'fraction degenerate' — the complement is, and is emitted as degeneracy_fraction."
+      },
+      "_provenance": {
+        "api_calls": 0,
+        "float_dp": 6,
+        "grid": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          12,
+          16,
+          24,
+          32,
+          48,
+          64
+        ],
+        "saturation_tol": 0.005,
+        "source": "answer_session_ids + has_answer, from the cleaned official release"
+      },
+      "analytic_saturation_k": 6,
+      "by_type": {
+        "knowledge-update": {
+          "ceiling": {
+            "1": 0.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 1.0,
+            "24": 1.0,
+            "3": 1.0,
+            "32": 1.0,
+            "4": 1.0,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-limited",
+          "max_gold_sessions": 2,
+          "mean_gold_sessions": 2.0,
+          "n": 72,
+          "probe": {
+            "1": 0.0,
+            "2": 1.0,
+            "4": 1.0
+          }
+        },
+        "multi-session": {
+          "ceiling": {
+            "1": 0.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 0.619835,
+            "24": 1.0,
+            "3": 0.818182,
+            "32": 1.0,
+            "4": 0.950413,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-limited",
+          "max_gold_sessions": 5,
+          "mean_gold_sessions": 2.61157,
+          "n": 121,
+          "probe": {
+            "1": 0.0,
+            "2": 0.619835,
+            "4": 0.950413
+          }
+        },
+        "single-session-assistant": {
+          "ceiling": {
+            "1": 1.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 1.0,
+            "24": 1.0,
+            "3": 1.0,
+            "32": 1.0,
+            "4": 1.0,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-independent",
+          "max_gold_sessions": 1,
+          "mean_gold_sessions": 1.0,
+          "n": 56,
+          "probe": {
+            "1": 1.0,
+            "2": 1.0,
+            "4": 1.0
+          }
+        },
+        "single-session-preference": {
+          "ceiling": {
+            "1": 1.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 1.0,
+            "24": 1.0,
+            "3": 1.0,
+            "32": 1.0,
+            "4": 1.0,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-independent",
+          "max_gold_sessions": 1,
+          "mean_gold_sessions": 1.0,
+          "n": 30,
+          "probe": {
+            "1": 1.0,
+            "2": 1.0,
+            "4": 1.0
+          }
+        },
+        "single-session-user": {
+          "ceiling": {
+            "1": 1.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 1.0,
+            "24": 1.0,
+            "3": 1.0,
+            "32": 1.0,
+            "4": 1.0,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-independent",
+          "max_gold_sessions": 1,
+          "mean_gold_sessions": 1.0,
+          "n": 64,
+          "probe": {
+            "1": 1.0,
+            "2": 1.0,
+            "4": 1.0
+          }
+        },
+        "temporal-reasoning": {
+          "ceiling": {
+            "1": 0.15748,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 0.80315,
+            "24": 1.0,
+            "3": 0.92126,
+            "32": 1.0,
+            "4": 0.937008,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "mixed",
+          "max_gold_sessions": 6,
+          "mean_gold_sessions": 2.204724,
+          "n": 127,
+          "probe": {
+            "1": 0.15748,
+            "2": 0.80315,
+            "4": 0.937008
+          }
+        }
+      },
+      "ceiling": {
+        "1": 0.361702,
+        "12": 1.0,
+        "16": 1.0,
+        "2": 0.848936,
+        "24": 1.0,
+        "3": 0.931915,
+        "32": 1.0,
+        "4": 0.970213,
+        "48": 1.0,
+        "6": 1.0,
+        "64": 1.0,
+        "8": 1.0
+      },
+      "corpus_size": {
+        "n_sessions_max": 490,
+        "n_sessions_mean": 475.31,
+        "n_sessions_median": 476.0,
+        "n_sessions_min": 460,
+        "unit": "session"
+      },
+      "degeneracy_fraction": {
+        "1": 0.0,
+        "12": 0.0,
+        "16": 0.0,
+        "2": 0.0,
+        "24": 0.0,
+        "3": 0.0,
+        "32": 0.0,
+        "4": 0.0,
+        "48": 0.0,
+        "6": 0.0,
+        "64": 0.0,
+        "8": 0.0
+      },
+      "n_abstention": 30,
+      "n_answerable": 470,
+      "n_questions": 500,
+      "partial": {
+        "1": 0.648298,
+        "12": 1.0,
+        "16": 1.0,
+        "2": 0.934894,
+        "24": 1.0,
+        "3": 0.977872,
+        "32": 1.0,
+        "4": 0.993191,
+        "48": 1.0,
+        "6": 1.0,
+        "64": 1.0,
+        "8": 1.0
+      },
+      "question_types_seen": [
+        "knowledge-update",
+        "multi-session",
+        "single-session-assistant",
+        "single-session-preference",
+        "single-session-user",
+        "temporal-reasoning"
+      ],
+      "survivors_at": {
+        "1": 1.0,
+        "12": 1.0,
+        "16": 1.0,
+        "2": 1.0,
+        "24": 1.0,
+        "3": 1.0,
+        "32": 1.0,
+        "4": 1.0,
+        "48": 1.0,
+        "6": 1.0,
+        "64": 1.0,
+        "8": 1.0
+      }
+    },
+    "S": {
+      "_key_semantics": {
+        "analytic_saturation_k": "K* = min{K : ceiling(K) >= 0.995}. Beyond it, no retriever can add evidence; all change is reader-side.",
+        "ceiling": "Pr(|answer_session_ids| <= K) — max recall@K for a PERFECT retriever.",
+        "corpus_fraction_ratio": "K / |corpus| per question. 1.0 means full-context.",
+        "degeneracy_fraction[K]": "Fraction of questions with K >= their own corpus size. Degenerate = the condition has silently become full-context.",
+        "partial": "Mean fraction of evidence retrievable within K.",
+        "survivors_at": "Fraction of questions whose corpus has >= K sessions. NOT 'fraction degenerate' — the complement is, and is emitted as degeneracy_fraction."
+      },
+      "_provenance": {
+        "api_calls": 0,
+        "float_dp": 6,
+        "grid": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          12,
+          16,
+          24,
+          32,
+          48,
+          64
+        ],
+        "saturation_tol": 0.005,
+        "source": "answer_session_ids + has_answer, from the cleaned official release"
+      },
+      "analytic_saturation_k": 6,
+      "by_type": {
+        "knowledge-update": {
+          "ceiling": {
+            "1": 0.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 1.0,
+            "24": 1.0,
+            "3": 1.0,
+            "32": 1.0,
+            "4": 1.0,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-limited",
+          "max_gold_sessions": 2,
+          "mean_gold_sessions": 2.0,
+          "n": 72,
+          "probe": {
+            "1": 0.0,
+            "2": 1.0,
+            "4": 1.0
+          }
+        },
+        "multi-session": {
+          "ceiling": {
+            "1": 0.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 0.619835,
+            "24": 1.0,
+            "3": 0.818182,
+            "32": 1.0,
+            "4": 0.950413,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-limited",
+          "max_gold_sessions": 5,
+          "mean_gold_sessions": 2.61157,
+          "n": 121,
+          "probe": {
+            "1": 0.0,
+            "2": 0.619835,
+            "4": 0.950413
+          }
+        },
+        "single-session-assistant": {
+          "ceiling": {
+            "1": 1.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 1.0,
+            "24": 1.0,
+            "3": 1.0,
+            "32": 1.0,
+            "4": 1.0,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-independent",
+          "max_gold_sessions": 1,
+          "mean_gold_sessions": 1.0,
+          "n": 56,
+          "probe": {
+            "1": 1.0,
+            "2": 1.0,
+            "4": 1.0
+          }
+        },
+        "single-session-preference": {
+          "ceiling": {
+            "1": 1.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 1.0,
+            "24": 1.0,
+            "3": 1.0,
+            "32": 1.0,
+            "4": 1.0,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-independent",
+          "max_gold_sessions": 1,
+          "mean_gold_sessions": 1.0,
+          "n": 30,
+          "probe": {
+            "1": 1.0,
+            "2": 1.0,
+            "4": 1.0
+          }
+        },
+        "single-session-user": {
+          "ceiling": {
+            "1": 1.0,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 1.0,
+            "24": 1.0,
+            "3": 1.0,
+            "32": 1.0,
+            "4": 1.0,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "retriever-independent",
+          "max_gold_sessions": 1,
+          "mean_gold_sessions": 1.0,
+          "n": 64,
+          "probe": {
+            "1": 1.0,
+            "2": 1.0,
+            "4": 1.0
+          }
+        },
+        "temporal-reasoning": {
+          "ceiling": {
+            "1": 0.15748,
+            "12": 1.0,
+            "16": 1.0,
+            "2": 0.80315,
+            "24": 1.0,
+            "3": 0.92126,
+            "32": 1.0,
+            "4": 0.937008,
+            "48": 1.0,
+            "6": 1.0,
+            "64": 1.0,
+            "8": 1.0
+          },
+          "classification": "mixed",
+          "max_gold_sessions": 6,
+          "mean_gold_sessions": 2.204724,
+          "n": 127,
+          "probe": {
+            "1": 0.15748,
+            "2": 0.80315,
+            "4": 0.937008
+          }
+        }
+      },
+      "ceiling": {
+        "1": 0.361702,
+        "12": 1.0,
+        "16": 1.0,
+        "2": 0.848936,
+        "24": 1.0,
+        "3": 0.931915,
+        "32": 1.0,
+        "4": 0.970213,
+        "48": 1.0,
+        "6": 1.0,
+        "64": 1.0,
+        "8": 1.0
+      },
+      "corpus_size": {
+        "n_sessions_max": 62,
+        "n_sessions_mean": 47.734,
+        "n_sessions_median": 48.0,
+        "n_sessions_min": 38,
+        "unit": "session"
+      },
+      "degeneracy_fraction": {
+        "1": 0.0,
+        "12": 0.0,
+        "16": 0.0,
+        "2": 0.0,
+        "24": 0.0,
+        "3": 0.0,
+        "32": 0.0,
+        "4": 0.0,
+        "48": 0.6,
+        "6": 0.0,
+        "64": 1.0,
+        "8": 0.0
+      },
+      "n_abstention": 30,
+      "n_answerable": 470,
+      "n_questions": 500,
+      "partial": {
+        "1": 0.648298,
+        "12": 1.0,
+        "16": 1.0,
+        "2": 0.934894,
+        "24": 1.0,
+        "3": 0.977872,
+        "32": 1.0,
+        "4": 0.993191,
+        "48": 1.0,
+        "6": 1.0,
+        "64": 1.0,
+        "8": 1.0
+      },
+      "question_types_seen": [
+        "knowledge-update",
+        "multi-session",
+        "single-session-assistant",
+        "single-session-preference",
+        "single-session-user",
+        "temporal-reasoning"
+      ],
+      "survivors_at": {
+        "1": 1.0,
+        "12": 1.0,
+        "16": 1.0,
+        "2": 1.0,
+        "24": 1.0,
+        "3": 1.0,
+        "32": 1.0,
+        "4": 1.0,
+        "48": 0.504,
+        "6": 1.0,
+        "64": 0.0,
+        "8": 1.0
+      }
+    }
+  }
+}

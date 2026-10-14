@@ -1,0 +1,83 @@
+# configs/arms.yaml — the arms of the crossed design (PRD §R4).
+#
+# Arms are DATA, not code: adding one needs no pipeline change. Each entry names
+# the template in prompts/ that renders it and what confounder it isolates.
+#
+# THE CRITICAL ENTRY IS `crossed_grid`. PRD §R4.4: arms A and G are ONE CROSSED
+# GRID, not two sweeps. A run that varies K at fixed B and B at fixed K does not
+# satisfy this requirement, and the interaction term — the paper's headline — is
+# exactly what a pair of marginal sweeps cannot produce.
+# `tests/test_crossed_grid.py` (Phase 5) asserts every (K, B) cell is present.
+
+schema_version: 1
+
+arms:
+  - id: A
+    isolates: K
+    enabled: true
+    prompt_template: arm_a.j2
+    notes: >-
+      Natural top-K in rank order, swept across the reference budget. This is the
+      baseline every paper in this literature actually runs. Primary.
+
+  - id: B
+    isolates: count vs length
+    enabled: true
+    prompt_template: arm_b.j2
+    notes: >-
+      Pad from `5_filler_sess` ONLY. Budget RELATIVE TO CORPUS (default 40%),
+      never absolute — there is nothing outside the corpus to pad beyond. Asserts
+      the token target within +/-2% AND asserts the padding contains ZERO gold
+      evidence. Separate from A because `length` in the primary model (R9.1) is
+      a continuous token count and NOT a binary arm indicator: Arm B exists
+      precisely to hold length constant while count varies.
+
+  - id: C
+    isolates: position
+    enabled: true
+    prompt_template: arm_c.j2
+    notes: >-
+      Identical retrieved set, 4 orderings, balanced seeds. Gold-rank histograms
+      at every K. The set is identical across orderings — that is what makes it
+      clean.
+
+  - id: D
+    isolates: full context
+    enabled: true
+    prompt_template: arm_d.j2
+    notes: >-
+      S ONLY. On M a budgeted-long-context variant is reported separately and
+      NEVER pooled with S's true full context (M averages ~1.2M tokens/question).
+
+  - id: E
+    isolates: negative control
+    enabled: true
+    prompt_template: arm_e.j2
+    notes: >-
+      Random memories from OTHER questions, count-matched. Runs FIRST in any
+      smoke test (PRD §R4.3). The pass threshold is a NUMBER, not "far below" —
+      set in P5 from the pilot, never guessed here.
+
+  - id: F
+    isolates: generation ceiling
+    enabled: true
+    prompt_template: arm_f.j2
+    notes: >-
+      The official `_oracle` file. Free, and it bounds our write path: if Arm F
+      is far above Arm A, retrieval is binding; if it is close, the WRITE path is.
+
+  - id: G
+    isolates: budget B
+    enabled: true
+    prompt_template: arm_g.j2
+    notes: >-
+      The budget sweep. NOT a separate sweep — its cells with A's are the crossed
+      grid, and the interaction between them is the paper (PRD §R4.4, R9.1).
+
+crossed_grid:
+  arms: [A, G]
+  key: [arm, K, B, B_mode, scale, reader]
+  notes: >-
+    Declared here so the crossed design is data, not an emergent property of
+    calling two functions in a loop. The condition key includes `B_mode`: a
+    prefix cached at B=4K must never be served at B=16K (PRD §R6.5, hazard H4).

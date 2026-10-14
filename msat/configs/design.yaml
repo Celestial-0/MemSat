@@ -1,0 +1,112 @@
+# configs/design.yaml - THE single source of the experimental grid (PRD §R0.1).
+#
+# "No grid may be defined anywhere else." `msat validate-config` enforces that by
+# grepping every other YAML in configs/ for `K_grid` / `B_grid` / `scales` /
+# `readers` keys and failing non-zero if one turns up. A second definition is not
+# a style violation - it is how a figure ends up describing two different
+# experiments.
+#
+# `msat design-power configs/design.yaml` reads this file to answer, before a
+# single API call: is the K x B INTERACTION estimable at this cell count?
+
+schema_version: 1
+
+# Retrieval depth K. A doubling grid: 6 points spanning 5 orders of magnitude.
+# PRD §R9.4 - K_delta is defined on the ACTUAL grid and normalised by step
+# position, because `A(K+1) - A(K) <= 0.5pp` is invalid on a doubling grid
+# (it compares a 1x step against 2x steps and fires far too early).
+#
+# TRIMMED FROM 64 ON 2026-10-13. `build-plan` rejects K=64 as fully degenerate on
+# the S scale: S questions hold a median of 48 sessions (max 62), so "retrieve the top
+# 64" returns the ENTIRE conversation for 100% of them - P1 measured
+# `frac_k_gt_corpus = 1.0`. The condition measures nothing about retrieval depth.
+# 64 declared meant every `build-plan` run rejected 3 cells to say so; the grid now
+# matches what can actually run. 126 cells -> 108.
+K_grid: [1, 2, 4, 8, 16, 32]
+
+# Context budget B. The MODE travels with each level (PRD §R1.7): mixing absolute
+# and relative budgets silently invalidates the interaction, because 4096 tokens
+# is a very different fraction of a 3 M-character corpus than of a 300 K-character
+# one.
+#
+# MODE CHANGED 2026-10-13: absolute_tokens -> per_memory_tokens.
+#
+# This is not a preference. Under `absolute_tokens` the prompt is
+# min(content(K), B) - the budget is a CUTOFF ON K expressed in tokens, so K and B
+# are the same axis in different units. The number of ACTIVE budget levels at
+# depth K is then monotone in K, which produces a staircase: a budget below
+# content(1) is active at every K and collapses them all; a budget above
+# content(64) is inert at every K and collapses them all. That staircase provably
+# cannot exceed 2 distinct outcomes at K=1 and K=2 for ANY choice of values -
+# verified over three candidate grids. 78 of 126 cells rendered a byte-identical
+# prompt to another cell, leaving 48 distinct conditions from 126 declared ones.
+#
+# An axis that cannot vary independently cannot carry an interaction, and the
+# K x B interaction is the whole claim of this design.
+#
+# Under `per_memory_tokens` the prompt is min(K, sessions) x min(mean_memory, B),
+# which scales WITH K. Doubling K doubles the prompt at any budget, and changing B
+# changes the density of what is shown without changing how many memories were
+# retrieved. The crossing is then real.
+#
+# It is also the more meaningful manipulation: "retrieve 16 memories and show the
+# first 512 tokens of each" is a genuinely different strategy from "retrieve 4
+# memories and show all of them". Truncating the concatenated list cannot express
+# that difference - it produces the same prompt for both.
+#
+# The values sit BELOW the measured mean memory length (~2,563 tokens on both
+# scales, from P1) on purpose. A budget at or above the mean is inert, because
+# truncating a memory to its own length is a no-op.
+#
+# 128 / 512 / 2048 are 4x steps, which is deliberate and load-bearing. The
+# interaction's standard error scales inversely with the spread of log2(B), so
+# the MDE is essentially 0.0177 / span(log2 B):
+#
+#   B_grid              span   MDE (log-odds)   cost     infeasible
+#   [512, 1024, 2048]     2.0      0.00888       325.4 h      20
+#   [128, 512, 1024]      3.0      0.00665       254.1 h       8
+#   [128, 512, 2048]      4.0      0.00523       292.1 h      14   <- chosen
+#   [64, 512, 2048]       5.0      0.00412       289.8 h      14
+#
+# A tight 2x grid costs 70% more MDE for 33 more GPU-hours, because the narrower
+# the spread of the moderator the worse the interaction is pinned down. [64,...]
+# buys a little more but B=64 is ~2.5% of a memory, which is a summarisation
+# regime rather than a retrieval one. [128, 512, 2048] is 5% / 20% / 80% of the
+# mean memory length and matches the 4x stepping of K_grid.
+#
+# The MDE here is 0.00523 against the 0.0050 previously reported - essentially the
+# same number, but HONEST. The old figure came from a grid whose B axis had a wide
+# nominal span while rendering only 48 distinct conditions from 126 declared ones.
+B_grid:
+  - value: 128
+    mode: per_memory_tokens
+  - value: 512
+    mode: per_memory_tokens
+  - value: 2048
+    mode: per_memory_tokens
+
+scales: [S, M]
+
+# Three local reader families. PRD §R7.5 requires >= 2; three are declared.
+# See `readers.yaml` for the pinned checkpoints and the VRAM ceiling that actually
+# binds (the declared context window does not).
+readers: [gemma, qwen, phi]
+
+items:
+  # Abstention items stay in end-to-end accuracy and are scored by the
+  # benchmark's own rule; they are excluded from recall@K (PRD §R8.4).
+  include_abstention: true
+  limit: null  # null = all 500. Not a PRD §R1.1 null - that rule covers retrieval.yaml.
+
+# Runs per cell. PRD §R7.4: this is reviewer question #2, so the rationale is
+# recorded in decoding.yaml next to the noise floor it has to clear.
+runs_per_cell: 3
+
+seed: 20261012
+
+# The one (K, B) a marginal single-factor sweep would centre on - i.e. what the
+# four papers that hold depth fixed are implicitly running. Recorded so the
+# interaction can be described as a departure from it.
+reference:
+  K: 16
+  B: 1024

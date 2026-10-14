@@ -42,15 +42,35 @@ def main() -> int:
 
     _section("core stack")
     mods = [
-        "msat", "torch", "transformers", "sentence_transformers", "duckdb",
-        "pyarrow", "pandas", "numpy", "scipy", "statsmodels", "plotly",
-        "kaleido", "ijson", "pydantic",
+        "msat",
+        "torch",
+        "transformers",
+        "sentence_transformers",
+        "duckdb",
+        "pyarrow",
+        "pandas",
+        "numpy",
+        "scipy",
+        "statsmodels",
+        "plotly",
+        "kaleido",
+        "ijson",
+        "pydantic",
     ]
     for name in mods:
         try:
             print(f"  {name:22s} {_version(name)}")
+        except ImportError:
+            print(f"  {name:22s} MISSING")
+        except OSError as exc:
+            # Installed, but Windows Application Control refused one of its DLLs.
+            # See the torch section below for the full explanation.
+            print(
+                f"  {name:22s} BLOCKED by Application Control (WinError "
+                f"{getattr(exc, 'winerror', '?')})"
+            )
         except Exception as exc:  # noqa: BLE001 - report, do not raise
-            print(f"  {name:22s} MISSING ({type(exc).__name__})")
+            print(f"  {name:22s} ERROR ({type(exc).__name__}: {exc})")
 
     _section("torch / CUDA")
     try:
@@ -64,14 +84,39 @@ def main() -> int:
             for i in range(torch.cuda.device_count()):
                 p = torch.cuda.get_device_properties(i)
                 cap = f"{p.major}.{p.minor}"
-                print(f"  gpu[{i}] {p.name}  sm_{cap.replace('.', '')}  "
-                      f"{p.total_memory / 1024**3:.1f} GB")
+                print(
+                    f"  gpu[{i}] {p.name}  sm_{cap.replace('.', '')}  "
+                    f"{p.total_memory / 1024**3:.1f} GB"
+                )
             print(f"  arch list    {torch.cuda.get_arch_list()}")
         else:
             print("  -> no CUDA device. Either the CPU wheel was installed, or")
             print("     the NVIDIA driver predates CUDA 13.2 (needs >= R595).")
     except ImportError:
         print("  torch not installed — run `make setup`")
+    except OSError as exc:
+        # WinError 4551 = ERROR_BLOCKED_BY_APP_CONTROL_POLICY. On Windows 11 with
+        # Smart App Control ON, individual DLLs inside an otherwise-fine torch
+        # wheel are refused. The wheel is installed and correct — the machine
+        # policy is what blocks it. Reporting this as "torch MISSING" would send
+        # you hunting for a dependency that is actually present.
+        print("  torch INSTALLED BUT BLOCKED BY WINDOWS APPLICATION CONTROL")
+        print(f"  {type(exc).__name__}: {exc}")
+        print()
+        print("  This is a machine security policy, not a dependency problem.")
+        print("  Phases NOT blocked: P1, P2, P4, P5, P6, P7, P9, P10 — none import torch.")
+        print("  Phases blocked:     P3 (embedder) and P8 (local reader family B).")
+        print()
+        print("  List exactly which DLLs are refused:")
+        print("    uv run python scripts/check_app_control.py")
+        print()
+        print("  Remediation, in order of preference:")
+        print("    1. Turn OFF Smart App Control, then reboot:")
+        print("       Settings > Privacy & security > Windows Security >")
+        print("       App & browser control > Smart App Control > Off")
+        print("    2. Retry later — Smart App Control uses cloud file reputation,")
+        print("       which improves as a widely-downloaded file is seen more often.")
+        print("    3. Run the GPU phases under WSL2 / Linux.")
 
     _section("figures")
     try:
@@ -92,6 +137,9 @@ def main() -> int:
             print("  -> run `make chrome` before `make figures`")
     except ImportError:
         print("  plotly/kaleido not installed")
+    except OSError as exc:
+        # Same Application Control class of failure as torch, above.
+        print(f"  plotly/kaleido present but BLOCKED: {type(exc).__name__}: {exc}")
 
     return 0
 

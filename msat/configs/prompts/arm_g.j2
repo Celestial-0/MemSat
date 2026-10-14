@@ -1,0 +1,49 @@
+{#
+  Arm G — isolates BUDGET B.
+
+  THE PAPER IS THE CROSSING OF A AND G, NOT EITHER ALONE (PRD §R4.4).
+
+  Nobody has estimated the `log2(K) x log2(B)` interaction. 2605.03675 runs both
+  factors in one paper and never crosses them — k at the default budget, budget
+  at the default k=4, explicitly "no interaction term, regression, factorial
+  model, or two-way analysis". 2607.17545 concedes the joint problem as future
+  work in its own Limitations. 2607.29104 has two matched grids and no factorial.
+
+  So Arm G is not a second sweep. Every cell in `K_grid x B_grid` is a distinct
+  condition, keyed `(arm, K, B, B_mode, scale, reader)` and executed in
+  RANDOMIZED INTERLEAVED order (PRD §R5.1) — never sequentially by K, because
+  provider drift would otherwise be able to masquerade as a curve.
+
+  B's mode travels with the value (PRD §R1.7). A prefix cached at B=4K must
+  never be served at B=16K (PRD §R6.5, hazard H4): that is a silent correctness
+  bug, not a performance optimisation.
+
+  The prompt itself is identical to Arm A's — G varies the BUDGET, and a
+  different template would confound the crossing with a prompt effect.
+#}
+system: |
+  You are answering a question about a conversation history. Use ONLY the
+  numbered memories provided. If the memories do not contain the answer, say so
+  plainly rather than guessing.
+
+user: |
+  {{ memories }}
+
+  Question: {{ question }}
+
+  Answer with the shortest span that answers the question. Do not explain.
+
+budget:
+  # Applied AFTER retrieval, in this order:
+  #   1. take the top-K ranked sessions;
+  #   2. accumulate in rank order until the budget is exhausted;
+  #   3. truncate the LAST session mid-turn if it does not fit, and record the
+  #      truncation in the manifest (PRD §R4.2).
+  #
+  # Truncating whole sessions instead would silently reduce K, which would make
+  # a budget effect indistinguishable from a depth effect — destroying the very
+  # crossing being estimated.
+  apply: after_retrieval
+  truncate_last_session: mid_turn
+  record_truncation_in_manifest: true
+  max_tokens_field: decoding.max_tokens

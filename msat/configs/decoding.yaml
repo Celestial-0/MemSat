@@ -1,0 +1,33 @@
+# configs/decoding.yaml — decoding, seeds, and the runs-per-cell rationale
+# (PRD §R7.1 – §R7.4).
+
+schema_version: 1
+
+# PRD §R7.1 — SEEDS MUST VARY SOMETHING.
+# At `temperature: 0` with a fixed prompt, repeat runs are byte-identical and
+# the content-addressed store (PRD §R6.1) DEDUPES THEM TO ONE FILE. Seed-variance
+# estimation then becomes unachievable — and silently so, because nothing
+# errors; the data simply collapses. Both knobs below are therefore non-zero:
+# temperature is stochastic AND the prompt carries a nonce.
+temperature: 0.7
+prompt_nonce: true  # a per-request nonce, so even temperature-0 arms stay distinct
+
+top_p: 0.95
+max_tokens: 512
+stop_sequences:
+  - "\n\nQuestion:"
+  - "<|endoftext|>"
+
+provider_seed: 20261012
+
+# PRD §R7.3 — explicit, with a stated default, because it moves cost by roughly
+# an order of magnitude. An unstated reasoning budget makes the cost model
+# unsound, and PRD §R9.8 reports `cost_uncached` as the PRIMARY figure.
+reasoning_budget_tokens: 0
+reasoning_budget_rationale: >-
+  Disabled for the primary arm so the reader is a fixed function of its prompt,
+  which is what makes Arm C's four orderings and Arm B's padding comparable at
+  all. 2606.21807's reader-strength effect is modelled via the reader covariate
+  (PRD §R7.6), not by turning reasoning on and confounding it with K. A
+  reasoning-enabled arm is a separate, declared condition if the guide asks for
+  one.
