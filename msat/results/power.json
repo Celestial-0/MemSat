@@ -11,7 +11,7 @@
   "_provenance": {
     "alpha": 0.05,
     "api_calls": 0,
-    "config_hash": "9a2006384313f9b131ef50c350b4219e978d2e93b8cdc2fd3e19877262ccd47c",
+    "config_hash": "0662bbcf0259b3a143f61b5f9c11fe439ac252977d2e4413800680823b480412",
     "generated_by": "msat design-power",
     "n_sim_per_point": 30,
     "preregistered_sign": "approximately_zero",
@@ -36,121 +36,32 @@
     "available": true,
     "judge_audit_hours": 75.0,
     "judge_hours": 75.0,
-    "judge_share_of_total": 0.344,
+    "judge_share_of_total": 0.411,
     "max_wall_clock_hours": 336.0,
-    "multiple_of_budget": 0.65,
+    "multiple_of_budget": 0.54,
     "n_calls": 162000,
     "per_reader": {
       "gemma": {
         "calls": 54000,
-        "hours": 22.6
+        "hours": 10.8
       },
       "phi": {
         "calls": 54000,
-        "hours": 22.6
+        "hours": 10.8
       },
       "qwen": {
         "calls": 54000,
-        "hours": 22.6
+        "hours": 10.8
       }
     },
-    "reader_hours": 67.7,
-    "total_days": 9.1,
-    "total_hours": 217.7,
+    "reader_hours": 32.5,
+    "total_days": 7.6,
+    "total_hours": 182.5,
     "within_budget": true
   },
   "context_feasibility": {
-    "infeasible_cells": {
-      "phi": [
-        {
-          "B": 2048.0,
-          "B_mode": "per_memory_tokens",
-          "K": 32,
-          "arm": "A+G",
-          "blocked_by": "vram",
-          "ceiling": 44318,
-          "context_window": 131072,
-          "overflow_by": 21718,
-          "prompt_tokens": 66036,
-          "reader": "phi",
-          "scale": "S",
-          "vram_capacity_tokens": 44318
-        },
-        {
-          "B": 2048.0,
-          "B_mode": "per_memory_tokens",
-          "K": 32,
-          "arm": "A+G",
-          "blocked_by": "vram",
-          "ceiling": 44318,
-          "context_window": 131072,
-          "overflow_by": 21718,
-          "prompt_tokens": 66036,
-          "reader": "phi",
-          "scale": "M",
-          "vram_capacity_tokens": 44318
-        }
-      ],
-      "qwen": [
-        {
-          "B": 2048.0,
-          "B_mode": "per_memory_tokens",
-          "K": 16,
-          "arm": "A+G",
-          "blocked_by": "vram",
-          "ceiling": 20889,
-          "context_window": 262144,
-          "overflow_by": 12379,
-          "prompt_tokens": 33268,
-          "reader": "qwen",
-          "scale": "S",
-          "vram_capacity_tokens": 20889
-        },
-        {
-          "B": 2048.0,
-          "B_mode": "per_memory_tokens",
-          "K": 32,
-          "arm": "A+G",
-          "blocked_by": "vram",
-          "ceiling": 20889,
-          "context_window": 262144,
-          "overflow_by": 45147,
-          "prompt_tokens": 66036,
-          "reader": "qwen",
-          "scale": "S",
-          "vram_capacity_tokens": 20889
-        },
-        {
-          "B": 2048.0,
-          "B_mode": "per_memory_tokens",
-          "K": 16,
-          "arm": "A+G",
-          "blocked_by": "vram",
-          "ceiling": 20889,
-          "context_window": 262144,
-          "overflow_by": 12379,
-          "prompt_tokens": 33268,
-          "reader": "qwen",
-          "scale": "M",
-          "vram_capacity_tokens": 20889
-        },
-        {
-          "B": 2048.0,
-          "B_mode": "per_memory_tokens",
-          "K": 32,
-          "arm": "A+G",
-          "blocked_by": "vram",
-          "ceiling": 20889,
-          "context_window": 262144,
-          "overflow_by": 45147,
-          "prompt_tokens": 66036,
-          "reader": "qwen",
-          "scale": "M",
-          "vram_capacity_tokens": 20889
-        }
-      ]
-    },
-    "n_infeasible": 6,
+    "infeasible_cells": {},
+    "n_infeasible": 0,
     "policy": "reject_cell — never truncate silently (PRD §R3.2)",
     "prompt_overhead_tokens": 500.0,
     "readers": {
@@ -159,7 +70,7 @@
         "ceiling": 66160,
         "context_window": 131072,
         "kv_mb_per_1k": 82.03125,
-        "largest_prompt": 66036,
+        "largest_prompt": 16884,
         "vram_capacity_tokens": 66160,
         "weight_gb": 2.2
       },
@@ -168,7 +79,7 @@
         "ceiling": 44318,
         "context_window": 131072,
         "kv_mb_per_1k": 125.0,
-        "largest_prompt": 66036,
+        "largest_prompt": 16884,
         "vram_capacity_tokens": 44318,
         "weight_gb": 2.09
       },
@@ -177,7 +88,7 @@
         "ceiling": 20889,
         "context_window": 262144,
         "kv_mb_per_1k": 125.0,
-        "largest_prompt": 66036,
+        "largest_prompt": 16884,
         "vram_capacity_tokens": 20889,
         "weight_gb": 4.95
       }
@@ -237,7 +148,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -250,7 +161,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -276,7 +187,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -289,7 +200,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -315,7 +226,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -328,7 +239,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -354,7 +265,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -367,7 +278,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -393,7 +304,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -406,7 +317,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -432,6 +343,19 @@
         "scale": "S"
       },
       {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 32,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 6807,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
         "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
@@ -445,20 +369,20 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 128.0,
         "B_mode": "per_memory_tokens",
-        "K": 32,
+        "K": 1,
         "arm": "A+G",
         "calls": 1500,
         "cost_usd": 0.0,
         "output_tokens": 80,
-        "pricing_model": "google/gemma-4-E4B-it",
-        "prompt_tokens": 6807,
-        "reader": "gemma",
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 400,
+        "reader": "qwen",
         "scale": "S"
       },
       {
-        "B": 128.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -484,20 +408,20 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 128.0,
         "B_mode": "per_memory_tokens",
-        "K": 1,
+        "K": 2,
         "arm": "A+G",
         "calls": 1500,
         "cost_usd": 0.0,
         "output_tokens": 80,
         "pricing_model": "Qwen/Qwen3.5-9B",
-        "prompt_tokens": 400,
+        "prompt_tokens": 705,
         "reader": "qwen",
         "scale": "S"
       },
       {
-        "B": 128.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -523,19 +447,6 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
-        "B_mode": "per_memory_tokens",
-        "K": 2,
-        "arm": "A+G",
-        "calls": 1500,
-        "cost_usd": 0.0,
-        "output_tokens": 80,
-        "pricing_model": "Qwen/Qwen3.5-9B",
-        "prompt_tokens": 705,
-        "reader": "qwen",
-        "scale": "S"
-      },
-      {
         "B": 128.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
@@ -549,7 +460,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -562,7 +473,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -588,7 +499,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -601,7 +512,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -627,7 +538,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -640,7 +551,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -666,7 +577,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
         "arm": "A+G",
@@ -679,7 +590,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
         "arm": "A+G",
@@ -705,7 +616,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -718,7 +629,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -744,7 +655,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -757,7 +668,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -783,7 +694,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -796,7 +707,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -822,7 +733,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -835,7 +746,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -861,7 +772,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -874,7 +785,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -900,7 +811,7 @@
         "scale": "S"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
         "arm": "A+G",
@@ -913,7 +824,7 @@
         "scale": "S"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
         "arm": "A+G",
@@ -939,7 +850,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -952,7 +863,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -978,7 +889,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -991,7 +902,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -1017,7 +928,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -1030,7 +941,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -1056,7 +967,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -1069,7 +980,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -1095,7 +1006,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -1108,7 +1019,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -1134,6 +1045,19 @@
         "scale": "M"
       },
       {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 32,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 60648,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
         "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
@@ -1147,20 +1071,20 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 128.0,
         "B_mode": "per_memory_tokens",
-        "K": 32,
+        "K": 1,
         "arm": "A+G",
         "calls": 1500,
         "cost_usd": 0.0,
         "output_tokens": 80,
-        "pricing_model": "google/gemma-4-E4B-it",
-        "prompt_tokens": 60648,
-        "reader": "gemma",
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 2000,
+        "reader": "qwen",
         "scale": "M"
       },
       {
-        "B": 128.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -1186,20 +1110,20 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 128.0,
         "B_mode": "per_memory_tokens",
-        "K": 1,
+        "K": 2,
         "arm": "A+G",
         "calls": 1500,
         "cost_usd": 0.0,
         "output_tokens": 80,
         "pricing_model": "Qwen/Qwen3.5-9B",
-        "prompt_tokens": 2000,
+        "prompt_tokens": 3957,
         "reader": "qwen",
         "scale": "M"
       },
       {
-        "B": 128.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -1225,19 +1149,6 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
-        "B_mode": "per_memory_tokens",
-        "K": 2,
-        "arm": "A+G",
-        "calls": 1500,
-        "cost_usd": 0.0,
-        "output_tokens": 80,
-        "pricing_model": "Qwen/Qwen3.5-9B",
-        "prompt_tokens": 3957,
-        "reader": "qwen",
-        "scale": "M"
-      },
-      {
         "B": 128.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
@@ -1251,7 +1162,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -1264,7 +1175,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -1290,7 +1201,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -1303,7 +1214,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -1329,7 +1240,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -1342,7 +1253,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -1368,7 +1279,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
         "arm": "A+G",
@@ -1381,7 +1292,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
         "arm": "A+G",
@@ -1407,7 +1318,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -1420,7 +1331,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 1,
         "arm": "A+G",
@@ -1446,7 +1357,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -1459,7 +1370,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 2,
         "arm": "A+G",
@@ -1485,7 +1396,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -1498,7 +1409,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 4,
         "arm": "A+G",
@@ -1524,7 +1435,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -1537,7 +1448,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 8,
         "arm": "A+G",
@@ -1563,7 +1474,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -1576,7 +1487,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 16,
         "arm": "A+G",
@@ -1602,7 +1513,7 @@
         "scale": "M"
       },
       {
-        "B": 512.0,
+        "B": 256.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
         "arm": "A+G",
@@ -1615,7 +1526,7 @@
         "scale": "M"
       },
       {
-        "B": 2048.0,
+        "B": 512.0,
         "B_mode": "per_memory_tokens",
         "K": 32,
         "arm": "A+G",
@@ -1651,11 +1562,11 @@
       },
       {
         "mode": "per_memory_tokens",
-        "value": 512.0
+        "value": 256.0
       },
       {
         "mode": "per_memory_tokens",
-        "value": 2048.0
+        "value": 512.0
       }
     ],
     "K_grid": [
@@ -1681,98 +1592,98 @@
     ]
   },
   "interaction": {
-    "mde_log_odds": 0.00608,
-    "mde_pp_at_p30": 0.1279,
-    "mde_pp_at_p50": 0.1521,
+    "mde_log_odds": 0.01065,
+    "mde_pp_at_p30": 0.2241,
+    "mde_pp_at_p50": 0.2662,
     "n_observations": 162000,
     "n_reps_per_point": 30,
-    "power_at_mde": 0.8667,
+    "power_at_mde": 0.7,
     "powered": true,
-    "se_log_odds": 0.001838
+    "se_log_odds": 0.003739
   },
   "judge_noise_sensitivity": [
     {
       "effect_attenuation": 1.0,
       "interpretation": "perfect measurement — an upper bound, not a forecast",
       "judge_flip": 0.0,
-      "mde_log_odds": 0.00593,
-      "mde_pp_at_p30": 0.1246,
-      "mde_pp_at_p50": 0.1481,
+      "mde_log_odds": 0.01081,
+      "mde_pp_at_p30": 0.2275,
+      "mde_pp_at_p50": 0.2703,
       "n_observations": 162000,
       "n_reps_per_point": 15,
       "power_at_mde": 0.7333,
       "powered": true,
-      "se_log_odds": 0.001795,
+      "se_log_odds": 0.003752,
       "sigma_run": 0.0
     },
     {
       "effect_attenuation": 0.96,
       "interpretation": "seed variance only; grader essentially exact",
       "judge_flip": 0.02,
-      "mde_log_odds": 0.00594,
-      "mde_pp_at_p30": 0.1248,
-      "mde_pp_at_p50": 0.1484,
+      "mde_log_odds": 0.01209,
+      "mde_pp_at_p30": 0.2545,
+      "mde_pp_at_p50": 0.3022,
       "n_observations": 162000,
       "n_reps_per_point": 15,
-      "power_at_mde": 0.8,
+      "power_at_mde": 0.7333,
       "powered": true,
-      "se_log_odds": 0.001773,
+      "se_log_odds": 0.003693,
       "sigma_run": 0.3
     },
     {
       "effect_attenuation": 0.88,
       "interpretation": "mild grader disagreement",
       "judge_flip": 0.06,
-      "mde_log_odds": 0.00647,
-      "mde_pp_at_p30": 0.136,
-      "mde_pp_at_p50": 0.1617,
+      "mde_log_odds": 0.0158,
+      "mde_pp_at_p30": 0.3328,
+      "mde_pp_at_p50": 0.3949,
       "n_observations": 162000,
       "n_reps_per_point": 15,
       "power_at_mde": 0.8667,
       "powered": true,
-      "se_log_odds": 0.001742,
+      "se_log_odds": 0.003567,
       "sigma_run": 0.6
     },
     {
       "effect_attenuation": 0.76,
       "interpretation": "poor grader agreement (kappa ~ 0.118 territory, per 2511.02246)",
       "judge_flip": 0.12,
-      "mde_log_odds": 0.007,
-      "mde_pp_at_p30": 0.1473,
-      "mde_pp_at_p50": 0.1751,
+      "mde_log_odds": 0.02079,
+      "mde_pp_at_p30": 0.4384,
+      "mde_pp_at_p50": 0.5197,
       "n_observations": 162000,
       "n_reps_per_point": 15,
-      "power_at_mde": 0.8,
+      "power_at_mde": 0.8667,
       "powered": true,
-      "se_log_odds": 0.001717,
+      "se_log_odds": 0.003501,
       "sigma_run": 1.0
     }
   ],
   "main_effects": {
     "corpus_fraction": {
-      "mde_log_odds": 0.3624,
-      "mde_pp_at_p50": 8.961,
-      "se_log_odds": 0.184877
+      "mde_log_odds": 0.3769,
+      "mde_pp_at_p50": 9.3114,
+      "se_log_odds": 0.192276
     },
     "gold_rank": {
-      "mde_log_odds": 0.0106,
-      "mde_pp_at_p50": 0.2639,
-      "se_log_odds": 0.005386
+      "mde_log_odds": 0.0108,
+      "mde_pp_at_p50": 0.2698,
+      "se_log_odds": 0.005507
     },
     "log2B": {
-      "mde_log_odds": 0.0068,
-      "mde_pp_at_p50": 0.1692,
-      "se_log_odds": 0.003454
+      "mde_log_odds": 0.0126,
+      "mde_pp_at_p50": 0.3153,
+      "se_log_odds": 0.006435
     },
     "log2K": {
-      "mde_log_odds": 0.0227,
-      "mde_pp_at_p50": 0.5678,
-      "se_log_odds": 0.011589
+      "mde_log_odds": 0.0151,
+      "mde_pp_at_p50": 0.3783,
+      "se_log_odds": 0.00772
     },
     "reader_strength": {
-      "mde_log_odds": 0.0643,
-      "mde_pp_at_p50": 1.6078,
-      "se_log_odds": 0.032823
+      "mde_log_odds": 0.066,
+      "mde_pp_at_p50": 1.6505,
+      "se_log_odds": 0.033697
     }
   },
   "strata": {
@@ -1820,9 +1731,9 @@
     }
   },
   "verdict": {
-    "binding_constraint": "Measurement quality, not sample size, is the binding constraint: the MDE degrades from 0.00593 to 0.007 log-odds (1.2x) as grader misclassification rises from 0% to 12%. Buying more cells would not help; buying a better grader would.",
+    "binding_constraint": "Measurement quality, not sample size, is the binding constraint: the MDE degrades from 0.01081 to 0.02079 log-odds (1.9x) as grader misclassification rises from 0% to 12%. Buying more cells would not help; buying a better grader would.",
     "budget": "BLOCKED",
-    "headline": "Interaction estimable: MDE = 0.00608 log-odds (0.1521 pp at p=0.5, 0.1279 pp at p=0.3). SE = 0.001838.",
+    "headline": "Interaction estimable: MDE = 0.01065 log-odds (0.2662 pp at p=0.5, 0.2241 pp at p=0.3). SE = 0.003739.",
     "powered": true
   }
 }

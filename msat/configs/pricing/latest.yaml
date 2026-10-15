@@ -61,18 +61,71 @@ models:
 # reader weakens independence (a judge that shares the reader's blind spots
 # cannot adjudicate them), so the panel deliberately spans two families and the
 # primary reader is NOT its own judge.
+# ⚠️ REVISED 2026-10-14 (D1). The previous pair was `Qwen/Qwen3-9B` and
+# `microsoft/Phi-4-mini` - BOTH are nonexistent repo ids, and they are the exact
+# three failures readers.yaml:10-22 documents. Readers were corrected on
+# 2026-10-13; the judge panel was not, and a judge panel pointing at weights that
+# cannot be pulled fails the same way a pricing table fails: silently, at load.
+#
+# Even corrected, that pair was WRONG on the merits. It put qwen and phi in the
+# reader panel AND the judge panel, so two of three readers would grade their own
+# answers - precisely what the independence note above warns against.
+#
+# DECISION: two families that appear NOWHERE in readers.yaml.
+# Readers are gemma / qwen / phi. Judges are mistral / granite. Four independent
+# lineages across the panel, and the primary reader is not judged by anything
+# sharing its weights or its pretraining corpus.
+#
+# SHAs are verified against the HF API on 2026-10-14, not guessed - see
+# readers.yaml:10-22 for what guessing cost last time.
+#
+#   judge_2 was FIRST `meta-llama/Llama-3.1-8B-Instruct`, which is
+#   `gated: manual`: the repo resolves (200) but `config.json` 401s without a
+#   token. A gated model cannot have its SHA verified here, so its provenance
+#   would be unrecordable - which fails R1.1's "no field may be null" for a
+#   different reason than a missing file. Granite replaced it: ungated, Apache
+#   2.0, and a family that is not a near-sibling of any reader.
 judges_local:
   - id: judge_1
-    model: Qwen/Qwen3-9B
+    model: mistralai/Mistral-7B-Instruct-v0.3
+    version: c170c708c41dac9275d15a8fff4eca08d52bab71
+    released: "2024-05-21"
+    exact_checkpoint_confirmed: true
+    vram:
+      params_b: 7.25
+      layers: 32
+      kv_heads: 8
+      head_dim: 128
+      bytes_per_param: 0.55
     rationale: >-
-      Different family from the primary reader. R8.2 wants at least one judge
-      independent of the reader.
+      Fourth family, absent from readers.yaml. KV is 128 KB/token, so the
+      ~4k-token judge prompt costs ~0.5 GB of cache - the panel's cost is
+      almost entirely weights, exactly as the D1 hardware note predicts for a
+      short-prompt judge.
+
   - id: judge_2
-    model: microsoft/Phi-4-mini
+    model: ibm-granite/granite-3.3-8b-instruct
+    version: 51dd4bc2ade4059a6bd87649d68aa11e4fb2529b
+    released: "2026-02-18"
+    exact_checkpoint_confirmed: true
+    vram:
+      params_b: 8.33
+      layers: 40
+      kv_heads: 8
+      head_dim: 128
+      bytes_per_param: 0.55
     rationale: >-
-      Second family. Weaker than judge_1, which is acceptable and informative:
-      R8.7's kappa-vs-human agreement is exactly the measurement that tells you
-      whether the weaker judge is usable.
+      Fifth family. Uniquely good KV geometry for a short-prompt judge: 8 KV
+      heads across 40 layers is 160 KB/token, so the same ~4k prompt costs
+      ~0.64 GB. Selected over the 4B Nemotron fallback because D1's own bar is
+      kappa >= 0.118 and a 4B model is where rubric scoring gets noisy.
+
+# ⚠️ THE PANEL IS SEQUENTIAL, NOT CONCURRENT, ON AN 8 GB CARD. Neither judge
+# exceeds the card alone, but at `headroom_gb: 3.0` the two weights together are
+# ~8.6 GB before any KV. This is D11 again: the judge's ability to load at all
+# depends on the SAME unresolved default as the reader panel's, and D11's
+# recommended (c) - measure it - now governs BOTH panels. Do not read these
+# numbers as independent of that decision.
 
 judge:
   input_tokens_approx: 4000   # answer + question + rubric

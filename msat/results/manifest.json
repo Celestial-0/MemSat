@@ -15,7 +15,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -29,7 +29,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -57,7 +57,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -71,7 +71,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -99,7 +99,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -113,7 +113,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -141,7 +141,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -155,7 +155,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -183,7 +183,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -197,7 +197,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -225,7 +225,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
       "arm": "A+G",
@@ -239,7 +239,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
       "arm": "A+G",
@@ -267,7 +267,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -281,7 +281,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -309,7 +309,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -323,7 +323,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -351,7 +351,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -365,7 +365,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -393,7 +393,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -407,7 +407,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -435,7 +435,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -449,7 +449,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -477,7 +477,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
       "arm": "A+G",
@@ -491,7 +491,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
       "arm": "A+G",
@@ -519,7 +519,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -533,7 +533,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -561,7 +561,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -575,7 +575,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -603,7 +603,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -617,7 +617,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -645,7 +645,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -659,7 +659,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -687,7 +687,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -701,7 +701,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -729,6 +729,20 @@
       "status": "accepted"
     },
     {
+      "B": 256.0,
+      "B_mode": "per_memory_tokens",
+      "K": 32,
+      "arm": "A+G",
+      "degeneracy_fraction": 0.0,
+      "example_reason": "",
+      "n_degenerate": 0,
+      "n_questions": 500,
+      "reader": "phi",
+      "reason": "ok",
+      "scale": "S",
+      "status": "accepted"
+    },
+    {
       "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
@@ -743,21 +757,21 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 128.0,
       "B_mode": "per_memory_tokens",
-      "K": 32,
+      "K": 1,
       "arm": "A+G",
       "degeneracy_fraction": 0.0,
       "example_reason": "",
       "n_degenerate": 0,
       "n_questions": 500,
-      "reader": "phi",
+      "reader": "gemma",
       "reason": "ok",
-      "scale": "S",
+      "scale": "M",
       "status": "accepted"
     },
     {
-      "B": 128.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -785,9 +799,9 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 128.0,
       "B_mode": "per_memory_tokens",
-      "K": 1,
+      "K": 2,
       "arm": "A+G",
       "degeneracy_fraction": 0.0,
       "example_reason": "",
@@ -799,7 +813,7 @@
       "status": "accepted"
     },
     {
-      "B": 128.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -827,20 +841,6 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
-      "B_mode": "per_memory_tokens",
-      "K": 2,
-      "arm": "A+G",
-      "degeneracy_fraction": 0.0,
-      "example_reason": "",
-      "n_degenerate": 0,
-      "n_questions": 500,
-      "reader": "gemma",
-      "reason": "ok",
-      "scale": "M",
-      "status": "accepted"
-    },
-    {
       "B": 128.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
@@ -855,7 +855,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -869,7 +869,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -897,7 +897,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -911,7 +911,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -939,7 +939,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -953,7 +953,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -981,7 +981,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
       "arm": "A+G",
@@ -995,7 +995,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
       "arm": "A+G",
@@ -1023,7 +1023,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -1037,7 +1037,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -1065,7 +1065,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -1079,7 +1079,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -1107,7 +1107,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -1121,7 +1121,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -1149,7 +1149,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -1163,7 +1163,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -1191,7 +1191,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -1205,7 +1205,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -1233,6 +1233,20 @@
       "status": "accepted"
     },
     {
+      "B": 256.0,
+      "B_mode": "per_memory_tokens",
+      "K": 32,
+      "arm": "A+G",
+      "degeneracy_fraction": 0.0,
+      "example_reason": "",
+      "n_degenerate": 0,
+      "n_questions": 500,
+      "reader": "qwen",
+      "reason": "ok",
+      "scale": "M",
+      "status": "accepted"
+    },
+    {
       "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
@@ -1247,21 +1261,21 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 128.0,
       "B_mode": "per_memory_tokens",
-      "K": 32,
+      "K": 1,
       "arm": "A+G",
       "degeneracy_fraction": 0.0,
       "example_reason": "",
       "n_degenerate": 0,
       "n_questions": 500,
-      "reader": "qwen",
+      "reader": "phi",
       "reason": "ok",
       "scale": "M",
       "status": "accepted"
     },
     {
-      "B": 128.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 1,
       "arm": "A+G",
@@ -1289,9 +1303,9 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 128.0,
       "B_mode": "per_memory_tokens",
-      "K": 1,
+      "K": 2,
       "arm": "A+G",
       "degeneracy_fraction": 0.0,
       "example_reason": "",
@@ -1303,7 +1317,7 @@
       "status": "accepted"
     },
     {
-      "B": 128.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 2,
       "arm": "A+G",
@@ -1331,20 +1345,6 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
-      "B_mode": "per_memory_tokens",
-      "K": 2,
-      "arm": "A+G",
-      "degeneracy_fraction": 0.0,
-      "example_reason": "",
-      "n_degenerate": 0,
-      "n_questions": 500,
-      "reader": "phi",
-      "reason": "ok",
-      "scale": "M",
-      "status": "accepted"
-    },
-    {
       "B": 128.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
@@ -1359,7 +1359,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -1373,7 +1373,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 4,
       "arm": "A+G",
@@ -1401,7 +1401,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -1415,7 +1415,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 8,
       "arm": "A+G",
@@ -1443,7 +1443,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -1457,7 +1457,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 16,
       "arm": "A+G",
@@ -1485,7 +1485,7 @@
       "status": "accepted"
     },
     {
-      "B": 512.0,
+      "B": 256.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
       "arm": "A+G",
@@ -1499,7 +1499,7 @@
       "status": "accepted"
     },
     {
-      "B": 2048.0,
+      "B": 512.0,
       "B_mode": "per_memory_tokens",
       "K": 32,
       "arm": "A+G",
@@ -1514,7 +1514,7 @@
     }
   ],
   "collisions": [],
-  "config_hash": "9a2006384313f9b131ef50c350b4219e978d2e93b8cdc2fd3e19877262ccd47c",
+  "config_hash": "0662bbcf0259b3a143f61b5f9c11fe439ac252977d2e4413800680823b480412",
   "corpus": {
     "M": {
       "corpus_tokens": {
@@ -1555,11 +1555,11 @@
       },
       {
         "mode": "per_memory_tokens",
-        "value": 512.0
+        "value": 256.0
       },
       {
         "mode": "per_memory_tokens",
-        "value": 2048.0
+        "value": 512.0
       }
     ],
     "K": [

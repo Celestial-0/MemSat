@@ -46,6 +46,8 @@ import numpy as np
 from scipy import stats
 from scipy.special import expit
 
+from msat.hardware.vram import DEFAULT_HEADROOM_GB
+
 ALPHA: Final = 0.05
 TARGET_POWER: Final = 0.80
 Z_ALPHA_2: Final = float(stats.norm.ppf(1 - ALPHA / 2))
@@ -325,13 +327,17 @@ INTERACTION_COLUMN: Final = 3
 #:
 #: Centring is a REPARAMETERISATION, not a different model: both predictors and
 #: their product are recoverable by linear transformation, the fitted values are
-#: identical, and the interaction test is the same. It is done here because
-#: R9.1's raw form is poorly conditioned at this grid.
+#: DEPRECATED and deliberately unused. These were the means of the ORIGINAL
+#: grids; `design.yaml` changed both axes on 2026-10-13 and nothing watching
+#: these constants complained. `_design_matrix` now calls `grid_center` on the
+#: grid it is handed, so no module-level centre can drift again. Kept named so
+#: an existing import fails loudly rather than silently picking up a stale
+#: value - delete once no caller references them.
 K_CENTER: Final = 3.0  # mean of log2([1,2,4,8,16,32,64])
-B_CENTER: Final = 14.0  # mean of log2([4096,16384,65536])
+B_CENTER: Final = 14.0  # mean of log2([4096,16384,65536]) - THE GRID THIS IS FROM NO LONGER EXISTS
 
 
-def grid_center(log_values: Sequence[float]) -> float:
+def grid_center(log_values: Sequence[float] | np.ndarray) -> float:
     """Centre a moderator on its OWN grid, rather than a constant in this file.
 
     `K_CENTER` and `B_CENTER` were hardcoded as the means of the original grids.
@@ -345,7 +351,10 @@ def grid_center(log_values: Sequence[float]) -> float:
     bug is worth eliminating: every one of today's findings was a value that had
     drifted away from the thing it described, and nothing was watching.
     """
-    if not log_values:
+    # `len(...) == 0`, not `if not ...`: callers pass numpy arrays, and
+    # truth-testing an array raises "truth value is ambiguous". The empty-grid
+    # guard has to work for both the Sequence signature and the array call site.
+    if len(log_values) == 0:
         raise ValueError("cannot centre an empty grid")
     return float(np.mean(np.asarray(log_values, dtype=float)))
 
@@ -414,8 +423,18 @@ def _design_matrix(
     reader_strength: np.ndarray,
     with_interaction: bool,
 ) -> np.ndarray:
-    k = log2k - K_CENTER
-    b = log2b - B_CENTER
+    # Centred on the grid THIS CALL was given, via `grid_center` - not on a
+    # constant in this file. `K_CENTER`/`B_CENTER` were the means of grids that
+    # no longer exist (`B_CENTER = 14.0` is the mean of log2[4096,16384,65536],
+    # removed 2026-10-13), and `_design_matrix` kept using them, so every power
+    # and MDE number was centred 5 log2 units off on the B axis. `grid_center`
+    # was written to prevent exactly this and had no caller. It has one now.
+    #
+    # Reparametrisation, so the interaction coefficient is invariant - but the
+    # old constant also silently broke `_prompt_tokens`-vs-`_interp_tokens`
+    # comparisons that assume a common centring, and nothing was watching.
+    k = log2k - grid_center(log2k)
+    b = log2b - grid_center(log2b)
     cols = [np.ones_like(k), k, b]
     if with_interaction:
         cols.append(k * b)
@@ -1204,7 +1223,7 @@ class ReaderLimit:
         weight_gb: float,
         kv_mb_per_1k: float,
         vram_gb: float = 8.0,
-        overhead_gb: float = 0.5,
+        overhead_gb: float = DEFAULT_HEADROOM_GB,
     ) -> ReaderLimit:
         """Derive the ceiling from published architecture numbers, not a guess."""
         return cls(
@@ -1227,7 +1246,7 @@ def vram_max_prompt_tokens(
     weight_gb: float,
     kv_mb_per_1k: float,
     vram_gb: float = 8.0,
-    overhead_gb: float = 0.5,
+    overhead_gb: float = DEFAULT_HEADROOM_GB,
 ) -> int:
     """Largest prompt that fits in VRAM, from KV cache arithmetic.
 
@@ -1241,6 +1260,13 @@ def vram_max_prompt_tokens(
 
     Returns 0 when the weights alone do not fit — a reader that cannot be resident
     at all is not "slow", it cannot run, and that must not read as a large number.
+
+    `overhead_gb` used to default to a LOCAL 0.5 while `hardware.vram` used 3.0 for
+    the same physical quantity, and both docstrings claimed the same four
+    components. The design path then marked deep cells feasible that the runtime
+    capacity preflight rejected — the D11 contradiction, and it was a duplicated
+    constant rather than a modelling disagreement. The default is now
+    `DEFAULT_HEADROOM_GB` so there is one number in the project.
     """
     if kv_mb_per_1k <= 0:
         raise ValueError(f"kv_mb_per_1k must be positive, got {kv_mb_per_1k}")
@@ -1248,6 +1274,28 @@ def vram_max_prompt_tokens(
     if available_mb <= 0:
         return 0
     return int(available_mb / kv_mb_per_1k * 1000.0)
+
+
+def headroom_that_fits(
+    *,
+    weight_gb: float,
+    kv_mb_per_1k: float,
+    required_prompt_tokens: int,
+    vram_gb: float = 8.0,
+) -> float:
+    """The largest headroom under which `required_prompt_tokens` still fits.
+
+    D11 asks whether the whole crossed grid is executable on this card, and the
+    answer is not a yes or a no: it is a threshold. This returns the largest
+    `overhead_gb` that still serves the deepest prompt this reader must run, so the
+    decision is made against a number rather than a preference.
+
+    Negative means the weights alone do not fit at any headroom.
+    """
+    if kv_mb_per_1k <= 0:
+        raise ValueError(f"kv_mb_per_1k must be positive, got {kv_mb_per_1k}")
+    kv_gb = required_prompt_tokens * kv_mb_per_1k / 1024.0 / 1024.0
+    return vram_gb - weight_gb - kv_gb
 
 
 def context_feasibility(

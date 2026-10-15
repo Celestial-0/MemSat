@@ -1,0 +1,256 @@
+{
+  "headroom_gb_is_open_decision": "D11. Every ceiling above moves with it: qwen's servable depth on 8 GB is 20,889 tokens at 0.8 GB of headroom and 2,682 at the 3.0 GB default. The number nobody decided is the number that decides which cells run.",
+  "headroom_sensitivity": {
+    "gemma": {
+      "default": 36326,
+      "loose_5.0gb": 11360,
+      "tight_0.8gb": 63789
+    },
+    "phi": {
+      "default": 24502,
+      "loose_5.0gb": 8118,
+      "tight_0.8gb": 42524
+    },
+    "qwen": {
+      "default": 2682,
+      "loose_5.0gb": 0,
+      "tight_0.8gb": 20704
+    }
+  },
+  "n_accepted": 96,
+  "n_checked": 108,
+  "n_rejected": 12,
+  "never_truncate_silently": true,
+  "note": "A rejected cell is reported, not repaired. Trimming the prompt leaves it able to contain its own answer while appearing not to, and the curve that follows measures nothing (PRD \u00a7R0.3 \u2014 propose, never truncate).",
+  "on_overflow": "reject_cell",
+  "panel_coverage": {
+    "common_support": 108,
+    "n_cells": 108,
+    "note": "Non-uniform coverage is a hardware fact, not a defect in the panel (readers.yaml: gemma ~66k, phi ~44k, qwen ~21k tokens on 8 GB). R9.12 refuses to compare readers over unequal K support for this reason.",
+    "readers": [
+      {
+        "binding_constraint": "vram",
+        "coverage": 1.0,
+        "declared_context_window": 131072,
+        "limit_tokens": 36326,
+        "n_cells": 108,
+        "n_served": 108,
+        "n_unsupported": 0,
+        "note": "K is compared against the token ceiling as a proxy for prompt length. Pass tokens_of=... for the exact question; this is the cheap bound.",
+        "reader": "gemma",
+        "unsupported": [],
+        "vram_ceiling": 36326
+      },
+      {
+        "binding_constraint": "vram",
+        "coverage": 1.0,
+        "declared_context_window": 262144,
+        "limit_tokens": 2682,
+        "n_cells": 108,
+        "n_served": 108,
+        "n_unsupported": 0,
+        "note": "K is compared against the token ceiling as a proxy for prompt length. Pass tokens_of=... for the exact question; this is the cheap bound.",
+        "reader": "qwen",
+        "unsupported": [],
+        "vram_ceiling": 2682
+      },
+      {
+        "binding_constraint": "vram",
+        "coverage": 1.0,
+        "declared_context_window": 131072,
+        "limit_tokens": 24502,
+        "n_cells": 108,
+        "n_served": 108,
+        "n_unsupported": 0,
+        "note": "K is compared against the token ceiling as a proxy for prompt length. Pass tokens_of=... for the exact question; this is the cheap bound.",
+        "reader": "phi",
+        "unsupported": [],
+        "vram_ceiling": 24502
+      }
+    ],
+    "served_per_reader": {
+      "gemma": 108,
+      "phi": 108,
+      "qwen": 108
+    },
+    "uniform_coverage": true
+  },
+  "per_reader": {
+    "gemma": {
+      "binding_constraint": "vram",
+      "ceiling_tokens": 36326,
+      "declared_context_window": 131072,
+      "n_accepted": 36,
+      "n_checked": 36,
+      "n_rejected": 0,
+      "vram_ceiling_tokens": 36326
+    },
+    "phi": {
+      "binding_constraint": "vram",
+      "ceiling_tokens": 24502,
+      "declared_context_window": 131072,
+      "n_accepted": 36,
+      "n_checked": 36,
+      "n_rejected": 0,
+      "vram_ceiling_tokens": 24502
+    },
+    "qwen": {
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "n_accepted": 24,
+      "n_checked": 36,
+      "n_rejected": 12,
+      "vram_ceiling_tokens": 2682
+    }
+  },
+  "policy": "reject_cell \u2014 never truncate silently (retrieval.yaml context_policy)",
+  "prompt_tokens_model": "declared design model, +500 tokens overhead, chars_per_token=4.0 (ASSUMED). The RENDERED prompt is measured instead at dispatch time.",
+  "rejected": [
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "S/qwen/K=8/B=512",
+      "overflow_by": 1914,
+      "prompt_tokens": 4596,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 4,596 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "S/qwen/K=16/B=256",
+      "overflow_by": 1914,
+      "prompt_tokens": 4596,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 4,596 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "S/qwen/K=16/B=512",
+      "overflow_by": 6010,
+      "prompt_tokens": 8692,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 8,692 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "S/qwen/K=32/B=128",
+      "overflow_by": 1914,
+      "prompt_tokens": 4596,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 4,596 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "S/qwen/K=32/B=256",
+      "overflow_by": 6010,
+      "prompt_tokens": 8692,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 8,692 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "S/qwen/K=32/B=512",
+      "overflow_by": 14202,
+      "prompt_tokens": 16884,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 16,884 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "M/qwen/K=8/B=512",
+      "overflow_by": 1914,
+      "prompt_tokens": 4596,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 4,596 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "M/qwen/K=16/B=256",
+      "overflow_by": 1914,
+      "prompt_tokens": 4596,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 4,596 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "M/qwen/K=16/B=512",
+      "overflow_by": 6010,
+      "prompt_tokens": 8692,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 8,692 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "M/qwen/K=32/B=128",
+      "overflow_by": 1914,
+      "prompt_tokens": 4596,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 4,596 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "M/qwen/K=32/B=256",
+      "overflow_by": 6010,
+      "prompt_tokens": 8692,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 8,692 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    },
+    {
+      "accepted": false,
+      "binding_constraint": "vram",
+      "ceiling_tokens": 2682,
+      "declared_context_window": 262144,
+      "label": "M/qwen/K=32/B=512",
+      "overflow_by": 14202,
+      "prompt_tokens": 16884,
+      "reader": "qwen",
+      "reason": "reader 'qwen' cannot serve 16,884 tokens: its ceiling on 8.0 GB is 2,682 (VRAM 2,682, declared window 262,144, bound by vram). Truncating would leave the prompt able to contain its own answer while appearing not to, and the resulting curve would measure nothing (R3.2, never_truncate_silently).",
+      "vram_ceiling_tokens": 2682
+    }
+  ],
+  "requirement": "PRD \u00a7R3.2"
+}

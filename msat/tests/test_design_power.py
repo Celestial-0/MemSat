@@ -409,15 +409,25 @@ def test_a_degenerate_cell_is_rejected_never_truncated(complete_configs: Path) -
         bundle.design.readers,
     )
 
-    # A ceiling chosen to bite, not inherited from a placeholder window.
-    tight = 20_000
+# A ceiling chosen to bite, derived from the grid rather than hardcoded.
+    # `20_000` was chosen when B topped out at 2048 (max prompt 65,536). B is now
+    # capped at 512, so the largest prompt is 16,384 and a 20k ceiling rejects
+    # nothing - the test passed vacuously against a guard that had stopped
+    # working. Derived so it keeps biting when the grid changes, which is the whole
+    # point: this asserts the guard fires, not that a number is twenty thousand.
+    largest_prompt = max(min(c.k, 48.0) * min(2563.0, c.b) for c in cells)
+    tight = int(largest_prompt * 0.5)
+    assert tight < largest_prompt, "the tight ceiling must actually bite"
     report = context_feasibility(
         cells,
         {r: ReaderLimit.from_window(r, tight) for r in bundle.design.readers},
         bundle.pricing,
     )
 
-    assert report["n_infeasible"] > 0, "a 20k ceiling must reject some cells"
+    assert report["n_infeasible"] > 0, (
+        f"a {tight}-token ceiling against a {largest_prompt}-token worst prompt "
+        f"must reject some cells"
+    )
 
     for rows in report["infeasible_cells"].values():
         for row in rows:

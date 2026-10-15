@@ -5,7 +5,7 @@
     "rows": "number of top-level JSON objects (0 if the file is not a JSON array)",
     "sha256": "hex digest of the raw file bytes"
   },
-  "data_dir": "C:\\Users\\shikh\\Research\\MemSat\\Research\\context\\raw",
+  "data_dir": "C:\\Users\\YASH\\Code\\Work\\MemSat\\Research\\context\\raw",
   "files": {
     "M": {
       "bytes": 2737100077,
@@ -23,7 +23,7 @@
     },
     "filler": {
       "filename": "5_filler_sess.json",
-      "note": "not found under C:\\Users\\shikh\\Research\\MemSat\\Research\\context\\raw",
+      "note": "not found under C:\\Users\\YASH\\Code\\Work\\MemSat\\Research\\context\\raw",
       "present": false
     },
     "oracle": {

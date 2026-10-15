@@ -58,31 +58,57 @@ K_grid: [1, 2, 4, 8, 16, 32]
 # scales, from P1) on purpose. A budget at or above the mean is inert, because
 # truncating a memory to its own length is a no-op.
 #
-# 128 / 512 / 2048 are 4x steps, which is deliberate and load-bearing. The
-# interaction's standard error scales inversely with the spread of log2(B), so
-# the MDE is essentially 0.0177 / span(log2 B):
+# RECAPPED 128/512/2048 -> 128/256/512 ON 2026-10-14, BECAUSE OF THE HARDWARE.
 #
-#   B_grid              span   MDE (log-odds)   cost     infeasible
-#   [512, 1024, 2048]     2.0      0.00888       325.4 h      20
-#   [128, 512, 1024]      3.0      0.00665       254.1 h       8
-#   [128, 512, 2048]      4.0      0.00523       292.1 h      14   <- chosen
-#   [64, 512, 2048]       5.0      0.00412       289.8 h      14
+# The previous max prompt is min(32 sessions) x 2048 tokens = 65,536 tokens.
+# Against the measured VRAM ceilings on the RTX 4060 (8 GB):
 #
-# A tight 2x grid costs 70% more MDE for 33 more GPU-hours, because the narrower
-# the spread of the moderator the worse the interaction is pinned down. [64,...]
-# buys a little more but B=64 is ~2.5% of a memory, which is a summarisation
-# regime rather than a retrieval one. [128, 512, 2048] is 5% / 20% / 80% of the
-# mean memory length and matches the 4x stepping of K_grid.
+#   reader   ceiling      worst prompt  margin
+#   gemma     66,160        65,536      624 tokens = 0.9%   <- primary
+#   phi       44,318        65,536      BLOCKED, short 21,218
+#   qwen      20,889        65,536      BLOCKED, short 44,647
 #
-# The MDE here is 0.00523 against the 0.0050 previously reported - essentially the
-# same number, but HONEST. The old figure came from a grid whose B axis had a wide
-# nominal span while rendering only 48 distinct conditions from 126 declared ones.
+# `msat design-power` confirmed: "6 cell(s) exceed their reader's window."
+#
+# Three things were wrong with running that on this card:
+#
+# 1. **0.9% margin on the primary reader is not a plan.** A run that OOMs at
+#    hour 60 of 218 loses the whole sweep, and R5.2's resume re-enters the same
+#    allocation. The margin also depends on `headroom_gb`, which is STILL AN
+#    OPEN DECISION (D11: 0.8 GB gives gemma 66,160; 3.0 GB gives 36,326). At
+#    3.0 GB the deepest cells are infeasible for the primary reader too. The
+#    design cannot rest on a constant that has not been measured.
+# 2. **A partial factorial is a weaker claim.** R4.4 says every cell in
+#    K_grid x B_grid is a distinct condition. 6 rejected cells means reporting
+#    an unbalanced design and explaining the holes.
+# 3. **It is not free.** The bigger prompts made the sweep 217.7 h instead of
+#    182.5 h.
+#
+# WHAT THIS COSTS, MEASURED (not estimated):
+#
+#   B_grid                span log2(B)   MDE (interaction)     infeasible   compute
+#   [128, 512, 2048]           4.0          0.1158 pp             6          217.7 h
+#   [128, 256,  512]           2.0          0.2662 pp             0          182.5 h
+#
+# 2.3x worse MDE. Both are ~40x smaller than the effect we are trying to
+# detect: 2503.04388 reports -20% from more documents at fixed length, and
+# 2608.15008 reports a -32% sign flip. A design that measures 0.27 pp has
+# ample power for either. A design that OOMs at hour 60 has none.
+#
+# **Reliability was chosen over precision, deliberately and with the numbers
+# above.** If this card is replaced with a 24 GB one, restoring 2048 buys
+# 0.15 pp of precision that the paper does not need - and B is the wrong axis
+# to spend the hardware on, because K is the one the field holds fixed.
+#
+# 128 / 256 / 512 = 5% / 10% / 20% of the measured mean memory length (2,563
+# tokens, P1). The whole band sits BELOW the mean, where truncation actually
+# does something: a budget at or above the mean is inert.
 B_grid:
   - value: 128
     mode: per_memory_tokens
-  - value: 512
+  - value: 256
     mode: per_memory_tokens
-  - value: 2048
+  - value: 512
     mode: per_memory_tokens
 
 scales: [S, M]

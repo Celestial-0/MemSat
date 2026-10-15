@@ -24,8 +24,10 @@ from msat.design import (
     build_cells,
     context_feasibility,
     duplicate_conditions,
+    headroom_that_fits,
     vram_max_prompt_tokens,
 )
+from msat.hardware.vram import DEFAULT_HEADROOM_GB
 
 # Two scales with deliberately simple anchors so the arithmetic is obvious.
 PRICING = {
@@ -47,10 +49,65 @@ PRICING = {
 
 # ── VRAM arithmetic ───────────────────────────────────────────────────────────
 def test_vram_capacity_is_plain_subtraction_and_division() -> None:
-    # 8 GB card, 2 GB weights, 0.5 GB overhead -> 5.5 GB = 5632 MB free.
-    # At 100 MB per 1k tokens that is 56.32k tokens.
-    cap = vram_max_prompt_tokens(weight_gb=2.0, kv_mb_per_1k=100.0)
-    assert cap == int(5632.0 / 100.0 * 1000.0) == 56_320
+    # 8 GB card, 2 GB weights, DEFAULT_HEADROOM_GB overhead. The expected value is
+    # derived from the constant rather than typed, because this test previously
+    # hardcoded the 0.5 GB default and therefore passed while the design path and
+    # the runtime capacity preflight disagreed about every reader's ceiling (D11).
+    free_mb = (8.0 - 2.0 - DEFAULT_HEADROOM_GB) * 1024.0
+    expected = int(free_mb / 100.0 * 1000.0)
+    assert vram_max_prompt_tokens(weight_gb=2.0, kv_mb_per_1k=100.0) == expected
+
+
+def test_the_design_and_runtime_ceilings_are_the_same_number() -> None:
+    """D11, as a regression test.
+
+    `design.vram_max_prompt_tokens` and `hardware.vram.kv_ceiling_tokens` are two
+    implementations of one formula. They carried different headroom defaults (0.5
+    vs 3.0) with docstrings claiming the SAME four components, so the design report
+    marked deep cells feasible that the runtime preflight then rejected. They must
+    now agree, because there is one constant.
+    """
+    from msat.hardware.vram import ModelShape, kv_ceiling_tokens
+
+    shape = ModelShape(
+        name="probe",
+        n_params=9_000_000_000,
+        n_layers=32,
+        n_kv_heads=4,
+        head_dim=256,
+        n_attention_heads=32,
+        dtype="bfloat16",
+        n_params_is_exact=True,
+    )
+    quant_bits = 4.4  # 0.55 bytes/param from readers.yaml
+    kv_mb_per_1k = shape.kv_bytes_per_token() * 1000 / 1024 / 1024
+
+    design_side = vram_max_prompt_tokens(
+        weight_gb=shape.weights_gb(quant_bits=quant_bits),
+        kv_mb_per_1k=kv_mb_per_1k,
+    )
+    runtime_side = kv_ceiling_tokens(shape, 8.0, quant_bits=quant_bits)
+
+    # kv_ceiling_tokens also subtracts a 512-token reserve, so the design side is
+    # allowed to be that much larger - and nothing more.
+    assert 0 <= design_side - runtime_side <= 512
+
+
+def test_headroom_that_fits_reports_the_threshold_not_a_preference() -> None:
+    """D11 made decidable: the largest headroom that still serves the deepest prompt.
+
+    Qwen's 16,884-token cell needs ~2.06 GB of KV; at 4.61 GB of weights on an 8 GB
+    card that leaves ~1.33 GB of headroom. The decision is therefore a number.
+    """
+    ok = headroom_that_fits(
+        weight_gb=4.61, kv_mb_per_1k=128.0 * 1000 / 1024, required_prompt_tokens=16_884
+    )
+    assert 1.0 < ok < 1.5, f"threshold moved to {ok:.2f} GB; re-derive before trusting it"
+
+    # Weights alone already too big: no headroom works.
+    assert headroom_that_fits(
+        weight_gb=7.5, kv_mb_per_1k=100.0, required_prompt_tokens=16_884
+    ) < 0
 
 
 def test_weights_alone_that_do_not_fit_yield_zero_not_a_huge_number() -> None:
@@ -65,9 +122,10 @@ def test_vram_capacity_rejects_a_nonsense_kv_rate() -> None:
 
 
 def test_binding_ceiling_is_the_smaller_of_window_and_vram() -> None:
+    free_mb = (8.0 - 2.0 - DEFAULT_HEADROOM_GB) * 1024.0
     wide = ReaderLimit.from_vram("wide", context_window=262_144, weight_gb=2.0, kv_mb_per_1k=100.0)
     assert wide.binding == "vram"
-    assert wide.ceiling == 56_320
+    assert wide.ceiling == int(free_mb / 100.0 * 1000.0)
 
     # A small window on a huge card: the window binds, not the memory.
     tight = ReaderLimit.from_window("tight", 8_192)

@@ -15,6 +15,8 @@ error.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any, Final, NoReturn, cast
 
@@ -670,10 +672,22 @@ def build_plan(
     refuses to launch a design whose planned cost exceeds `budget.max_usd`
     (PRD §N8).
 
-    PRD §R3.2, §R3.3, §R3.4.
+    It then builds the EXECUTABLE plan from the manifest it just wrote and asks
+    `planning.verify_crossed_grid` whether arms A and G really are one crossed
+    grid (PRD §R4.4). The manifest proves the grid was *written down*; the plan
+    proves it would be *executed*, and only the second is the requirement. A cell
+    rejected on one scale leaves a hole the config file knows nothing about, and a
+    hole that nobody was told about is the silent-truncated factorial R0.3 forbids.
+
+    Exit codes: unchanged — 0 clean, 3 (`EXIT_DEGENERATE_CELL`) when any cell was
+    rejected or the crossing is incomplete. A crossing gap and a rejected cell are
+    the same class of defect: a declared condition that will not run.
+
+    PRD §R3.2, §R3.3, §R3.4, §R4.4.
     """
     from msat.config import load_bundle
     from msat.manifest import build_manifest, stats_from_corpus, write_manifest
+    from msat.planning import plan_from_manifest, verify_crossed_grid, write_plan
 
     root = Path(run_spec).parent if run_spec else Path("configs")
     if not (root / "design.yaml").exists():
@@ -719,6 +733,10 @@ def build_plan(
         f"  accepted      {len(manifest.accepted)}   rejected {len(manifest.rejected)}"
         f"   (degeneracy: {len(manifest.fully_degenerate)})"
     )
+    log.info(
+        "manifest built",
+        extra={"config_hash": manifest.config_hash, "n_cells": len(manifest.cells)},
+    )
     for cell in manifest.rejected:
         typer.secho(
             f"    REJECTED  {cell.condition.scale}/{cell.condition.reader} "
@@ -740,10 +758,65 @@ def build_plan(
         )
 
     typer.echo(f"\n  wrote {dest}")
+
+    # ── R4.4 · is the grid actually CROSSED, or two marginal sweeps? ───────────
+    # The manifest says which conditions are VALID. Only the executable plan says
+    # which conditions will RUN, and a plan that quietly omits a cell is
+    # indistinguishable from one built from a smaller grid — which is the whole
+    # claim. `qids_by_scale` comes from the corpus stats already read above, so
+    # the schedule is the one this grid would really execute.
+    qids_by_scale = {
+        scale: [str(s.question_id) for s in stats] for scale, stats in corpus_map.items()
+    }
+    executable = plan_from_manifest(
+        dest,
+        qids_by_scale,
+        seed=int(bundle.design.seed),
+        runs_per_cell=int(bundle.design.runs_per_cell),
+    )
+    plan_path = write_plan(executable, dest.with_name(f"{dest.stem}.plan.json"))
+    crossed = verify_crossed_grid(
+        executable,
+        k_grid=bundle.design.K_grid,
+        b_grid=bundle.design.b_values,
+        scales=bundle.design.scales,
+        readers=bundle.design.readers,
+    )
+    crossed_path = dest.with_name("crossed_grid.json")
+    crossed_path.write_text(json.dumps(crossed, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    log.info(
+        "crossed grid verified",
+        extra={
+            "config_hash": manifest.config_hash,
+            "crossed": crossed["crossed"],
+            "n_planned_cells": crossed["n_planned_cells"],
+        },
+    )
+
+    typer.echo(f"  plan          {executable.n_units:,} unit(s) -> {plan_path.name}")
+    typer.echo(
+        f"  crossed       {'YES' if crossed['crossed'] else 'NO'}  "
+        f"({crossed['n_planned_cells']}/{crossed['n_expected_cells']} cells, "
+        f"reader_balanced={crossed['reader_balanced']})   R4.4"
+    )
+    for problem in crossed["problems"]:
+        typer.secho(f"    NOT CROSSED  {problem}", fg=typer.colors.RED)
+    typer.echo(f"  wrote {plan_path}")
+    typer.echo(f"  wrote {crossed_path}")
+
     if manifest.rejected:
         typer.secho(
             "  A rejected cell is not one that runs badly - it is a condition already "
             "satisfied before the manipulation is applied. Excluding it is the point.",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=EXIT_DEGENERATE_CELL)
+    if not crossed["crossed"]:
+        typer.secho(
+            f"  {crossed['n_expected_cells'] - crossed['n_planned_cells']} declared "
+            "(K, B) cell(s) are absent from the plan. Arms A and G must be ONE "
+            "crossed grid (PRD §R4.4): a pair of marginal sweeps produces no "
+            "interaction term, which is the paper's headline claim.",
             fg=typer.colors.RED,
         )
         raise typer.Exit(code=EXIT_DEGENERATE_CELL)
@@ -771,27 +844,65 @@ def run_experiment(
     questions: Annotated[
         Path | None, typer.Option("--questions", help="JSON: qid -> answer_session_ids.")
     ] = None,
+    gold: Annotated[
+        Path | None,
+        typer.Option(
+            "--gold",
+            help="JSON: qid -> gold answer. Required by the Arm E rung, which scores "
+            "the control against something.",
+        ),
+    ] = None,
+    arm_e_pool: Annotated[
+        Path | None,
+        typer.Option(
+            "--arm-e-pool",
+            help="JSON cross-question memory pool for the negative control: "
+            "{qid: {question, memories: [...]}}. Required by the Arm E rung.",
+        ),
+    ] = None,
+    reader_id: Annotated[
+        str | None,
+        typer.Option(
+            "--reader",
+            help="Restrict the run to one reader family. Default: the whole panel, "
+            "because a pipeline that flatters itself on the primary may not flatter "
+            "itself on the others.",
+        ),
+    ] = None,
 ) -> None:
     """Execute the crossed (K, B) grid: randomized order, WAL-backed, resumable.
 
     Never sequential by K — provider drift must not be able to masquerade as a
     curve (PRD §R5.1).
 
-    THE ORDER OF THE FOUR CHECKS BELOW IS THE POINT
-    ------------------------------------------------
+    THE ORDER OF THE CHECKS BELOW IS THE POINT
+    --------------------------------------------
     1. the arm registry builds            (are there even renderers?)
     2. the ladder rung is entered         (may this rung run at all?)
     3. Arm E's gate has PASSED            (does the pipeline collapse correctly?)
-    4. the plan is crossed               (will the interaction be estimable?)
+    4. the plan is crossed                (will the interaction be estimable?)
+    5. every cell fits its reader         (will it OOM, or be silently truncated?)
+    6. Arm E actually RUNS                (draw -> render -> generate -> evaluate)
 
     Each is cheap and each can refuse a run that would otherwise burn the budget.
     Checking them in a different order means the expensive one runs first, and the
     expensive one is the run.
 
-    `--dry-run` performs all four and stops. It is the only way to find out that the
-    design is sound before scheduling the thing that costs 292 hours.
+    Step 5 is PRD §R3.2 and it used to be missing entirely: nothing compared a
+    cell's prompt against the reader's *servable* ceiling, so a deep cell on a
+    small reader was dispatched and OOM'd at hour 60 instead of being rejected at
+    the planning stage. Overflow is a REJECTED CELL, never a truncated prompt —
+    `retrieval.yaml` sets `never_truncate_silently: true`.
 
-    PRD §R5.
+    Step 6 is the reason the ladder exists. Arm E is the gate on the whole
+    experiment: it draws memories from OTHER questions, so a correct reader scores
+    near zero, and a control that does NOT collapse means the pipeline is flattering
+    its own results. That has to be measured, not asserted.
+
+    `--dry-run` performs steps 1-5 and stops. It is the only way to find out that
+    the design is sound before scheduling the thing that costs 292 hours.
+
+    PRD §R5, §R3.2, §R4.3.
     """
     from msat.arms.registry import RegistryError, build_registry, declared_crossed_arms
     from msat.config import load_bundle
@@ -819,7 +930,20 @@ def run_experiment(
         check_order(state, cast("RungName", chosen))
     except LadderOrderViolationError as e:
         typer.secho(f"\n  {e}", fg=typer.colors.YELLOW)
-        raise typer.Exit(code=EXIT_NO_GO) from e
+        _gate_exit(
+            _evaluate_gate(
+                run_dir,
+                context=f"{resolved}/ladder",
+                run_id=resolved,
+                config_hash=bundle.config_hash,
+                notes=[
+                    f"Ladder order violation, not a measured result: {e}",
+                    "No cell has been executed, so branch (iv) is NOT EVALUATED rather "
+                    "than failed. This is a pre-run refusal, not a bounded negative.",
+                ],
+            ),
+            message="the ladder refuses this run",
+        )
     typer.echo(f"  ladder      entering rung {chosen!r}")
 
     # ── 3. Arm E's gate ──────────────────────────────────────────────────────
@@ -835,35 +959,133 @@ def run_experiment(
             fg=typer.colors.YELLOW,
         )
         if not dry_run:
-            raise typer.Exit(code=EXIT_NO_GO)
+            _gate_exit(
+                _evaluate_gate(
+                    run_dir,
+                    context=f"{resolved}/arm_e_thresholds",
+                    run_id=resolved,
+                    config_hash=bundle.config_hash,
+                    notes=[
+                        "Arm E's pass thresholds are null, so the negative control "
+                        "cannot be EVALUATED. `null` does not mean 'loosely' - it "
+                        "means the gate cannot be passed, and the gate gates "
+                        "(PRD §R4.3).",
+                    ],
+                ),
+                message="arm E cannot be evaluated, so no rung may proceed",
+            )
     else:
         typer.echo(f"  arm E       thresholds set {e_thresholds}")
 
-    # ── 4. the plan ──────────────────────────────────────────────────────────
+    # ── 4. the plan, and whether it is genuinely CROSSED (R4.4) ──────────────
     manifest_path = Path(plan) if plan else results_dir / "manifest.json"
     if not manifest_path.exists():
         _fail(f"no manifest at {manifest_path}; run `msat build-plan` first")
-    crossed = declared_crossed_arms(bundle)
+    crossed_arms = declared_crossed_arms(bundle)
     if not reg_report["crossed"]["agree"]:
         _fail(
-            f"arms.yaml declares crossed_grid {crossed} but the code has "
+            f"arms.yaml declares crossed_grid {crossed_arms} but the code has "
             f"{reg_report['crossed']['hard_coded']}. One of them is stale."
         )
-    typer.echo(f"  crossed     {', '.join(sorted(crossed))} (R4.4)")
+    typer.echo(f"  crossed     {', '.join(sorted(crossed_arms))} (R4.4)")
+
+    qids = _load_gold_sessions(questions) if questions else {}
+    executable = _plan_from(manifest_path, bundle, qids)
+    grid_report, n_interaction_cells, degenerate_cells = _crossing(executable, bundle)
+    _write_json(run_dir / "crossed_grid.json", grid_report)
+    typer.echo(
+        f"  grid        {grid_report['n_planned_cells']}/{grid_report['n_expected_cells']} "
+        f"cells crossed, {n_interaction_cells} (K,B) cell(s) estimable"
+    )
+    for problem in grid_report["problems"]:
+        typer.secho(f"    NOT CROSSED  {problem}", fg=typer.colors.RED)
+
+    # ── 5. R3.2 · every planned cell against its reader's SERVABLE ceiling ────
+    panel = _panel(bundle)
+    capacity = _capacity_preflight(bundle, executable, panel)
+    _write_json(run_dir / "capacity.json", capacity)
+    typer.echo(
+        f"  capacity    {capacity['n_accepted']}/{capacity['n_checked']} cell(s) fit "
+        f"their reader; {capacity['n_rejected']} rejected (R3.2)"
+    )
+    for reader_id_, row in sorted(capacity["per_reader"].items()):
+        typer.echo(
+            f"    {reader_id_:<8} ceiling {row['ceiling_tokens']:>7,}  "
+            f"bound by {row['binding_constraint']}"
+        )
+    for rejected in capacity["rejected"][:10]:
+        typer.secho(
+            f"    REJECTED  {rejected['label']}  prompt {rejected['prompt_tokens']:,} "
+            f"> ceiling {rejected['ceiling_tokens']:,} "
+            f"(+{rejected['overflow_by']:,}, bound by {rejected['binding_constraint']})",
+            fg=typer.colors.RED,
+        )
+    if capacity["n_rejected"] > 10:
+        typer.echo(f"    ... and {capacity['n_rejected'] - 10} more, in capacity.json")
+
+    # ── 6. the P5 GO/NO-GO gate, from `gate.py` ───────────────────────────────
+    # Before any generation, so a run that cannot answer its own question never
+    # spends the budget finding out.
+    preflight_verdict = _evaluate_gate(
+        run_dir,
+        context=f"{resolved}/preflight",
+        run_id=resolved,
+        config_hash=bundle.config_hash,
+        notes=[
+            "Pre-run gate. Branches (i)-(iii) are empty because no output has been "
+            "generated yet; branch (iv) is a property of the DESIGN and is decided "
+            "here, before a single token is spent.",
+        ],
+        accuracy_by_cell={},
+        recall_by_k={},
+        stratified=None,
+        degenerate_cells=degenerate_cells,
+        n_interaction_cells=n_interaction_cells,
+    )
+    if not preflight_verdict.proceed:
+        _gate_exit(preflight_verdict, message="the grid is not a crossed grid (R4.4)")
 
     if dry_run:
         typer.secho(
-            "\n  DRY RUN: registry, ladder, arm E gate and the crossed grid all checked. "
-            "Nothing was generated.",
+            "\n  DRY RUN: registry, ladder, arm E gate, the crossed grid and the R3.2 "
+            "capacity preflight all checked. Nothing was generated.",
             fg=typer.colors.GREEN,
         )
         typer.echo(f"  rungs available: {', '.join(r.name for r in LADDER)}")
+        typer.echo(f"  wrote {run_dir / 'go_no_go.json'}")
+        return
+
+    # ── 7. Arm E RUNS. This is the rung, and it is the gate on the experiment. ──
+    if chosen == "negative":
+        _run_arm_e_rung(
+            run_dir,
+            bundle=bundle,
+            registry=registry,
+            panel=panel,
+            executable=executable,
+            questions=Path(questions) if questions else None,
+            gold=Path(gold) if gold else None,
+            pool=Path(arm_e_pool) if arm_e_pool else None,
+            reader_id=reader_id,
+            run_id=resolved,
+        )
+        typer.secho(
+            "\n  ARM E COLLAPSED. The pipeline does not score without the right "
+            "evidence,\n  which is the precondition for every other arm meaning "
+            "anything.",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+        typer.echo("  next: `msat run " + resolved + " --rung baselines`")
+        typer.echo(f"  wrote {run_dir / 'go_no_go.json'}")
+        typer.echo(f"  wrote {run_dir / 'arm_e_control.json'}")
         return
 
     _fail(
-        "generation needs a backend. Everything above it - registry, ladder, arm E "
-        "gate, crossed grid - is validated; connect a vLLM/transformers backend and "
-        "the executor takes over from here."
+        "generation beyond the Arm E rung needs a backend. Everything up to it — "
+        "registry, ladder, arm E gate, crossed grid, R3.2 capacity, the negative "
+        "control — is validated and written to this run directory; connect a "
+        "vLLM/transformers backend and the executor takes over from here."
     )
 
 
@@ -902,6 +1124,960 @@ def _arm_e_thresholds(bundle: Any) -> dict[str, float] | None:
         "accuracy_below": float(cfg.pass_threshold_accuracy_below or 0.0),
         "recall_below": float(cfg.pass_threshold_recall_below or 0.0),
     }
+
+
+# ── writing artefacts ──────────────────────────────────────────────────────────
+def _write_json(path: Path, payload: Any) -> Path:
+    """One JSON artefact, written the same way everywhere.
+
+    `gate.py`'s own docstring says the verdict must be *written down, not printed*
+    — a gate that only prints lives in a scrollback buffer, and the argument about
+    whether it passed should not be reconstructible from memory three weeks later.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
+# ── P5 · the GO / NO-GO gate (the ONE implementation, in `gate.py`) ───────────
+def _evaluate_gate(
+    out_dir: Path,
+    *,
+    context: str,
+    run_id: str,
+    config_hash: str,
+    notes: Sequence[str] = (),
+    **inputs: Any,
+) -> Any:
+    """Evaluate `gate.gate()` and write `go_no_go.json`. Returns the verdict.
+
+    Three call sites used to raise `EXIT_NO_GO` from inline `if` statements, so
+    the four-branch verdict lived in three slightly different heads and the
+    `BOUNDED_NEGATIVE`-vs-`GO` decision was made three times. It is made once,
+    here, by the module that implements it, and the exit code follows
+    `GateVerdict.proceed` rather than a second opinion.
+
+    The four inputs default to EMPTY, never to a passing value. A branch with no
+    data fails and says so, and `gate()` is explicit that an empty degenerate list
+    over an unchecked grid is not estimability — so a caller that has only a design
+    fact to report still gets the honest verdict rather than an accidental GO.
+
+    `notes` is appended rather than passed through because `gate()` takes no notes
+    argument; a note is how a caller says WHICH of the four branches this call is
+    about, and a verdict that cannot say that is a verdict nobody can act on.
+    """
+    from msat.gate import gate
+
+    verdict = gate(
+        accuracy_by_cell=inputs.pop("accuracy_by_cell", {}),
+        recall_by_k=inputs.pop("recall_by_k", {}),
+        stratified=inputs.pop("stratified", None),
+        degenerate_cells=inputs.pop("degenerate_cells", []),
+        judge_floor_pp=inputs.pop("judge_floor_pp", 0.0),
+        n_questions=inputs.pop("n_questions", 0),
+        **inputs,
+    )
+    verdict.notes.extend(notes)
+    _write_json(out_dir / "go_no_go.json", {"context": context, **verdict.as_dict()})
+    log.info(
+        "p5 gate evaluated",
+        extra={
+            "run_id": run_id,
+            "config_hash": config_hash,
+            "gate_context": context,
+            "outcome": str(verdict.outcome),
+            "passed_branches": verdict.passed_branches,
+        },
+    )
+    typer.echo(f"  gate         {verdict.outcome}  ({context})")
+    for branch in verdict.branches:
+        mark = "PASS" if branch.passed else "fail"
+        colour = typer.colors.GREEN if branch.passed else typer.colors.RED
+        typer.secho(f"    {mark}  {branch.branch}", fg=colour)
+    return verdict
+
+
+def _gate_exit(verdict: Any, *, message: str) -> NoReturn:
+    """Print the four branches and exit `EXIT_NO_GO`.
+
+    One place decides the exit code from a verdict, so `EXIT_NO_GO` cannot mean
+    three different things depending on which command raised it.
+    """
+    typer.secho(f"\n  NO-GO: {message}", fg=typer.colors.RED, bold=True)
+    for branch in verdict.branches:
+        typer.secho(f"    {branch.branch}: {branch.detail}", fg=typer.colors.RED)
+    for note in verdict.notes:
+        typer.secho(f"    note: {note}", fg=typer.colors.YELLOW)
+    typer.secho(
+        "  A BOUNDED_NEGATIVE is a result, not a failure — and it is decided with the "
+        "guide IN ADVANCE,\n  not discovered after the budget is spent.",
+        fg=typer.colors.YELLOW,
+    )
+    raise typer.Exit(code=EXIT_NO_GO)
+
+
+# ── R3.2 · the servable ceiling, enforced before dispatch ──────────────────────
+@dataclass(frozen=True, slots=True)
+class CapacityVerdict:
+    """One prompt's fit against ONE reader's SERVABLE ceiling (PRD §R3.2).
+
+    A rejection, never a truncation. `retrieval.yaml` sets
+    `never_truncate_silently: true` and `on_overflow: reject_cell`, and the reason
+    is that a prompt cut to fit still contains its own answer while appearing not
+    to — the accuracy curve that follows measures nothing at all.
+
+    The ceiling is `min(declared window, VRAM)`, and `binding_constraint` says
+    which one bound. Both are reported because every family in `readers.yaml`
+    declares 131k-262k and can serve 2.7k-36k on an 8 GB card: a reader holding
+    only the number, without the label, checks the wrong ceiling and finds nothing
+    wrong right up until the allocation fails.
+    """
+
+    reader: str
+    label: str
+    prompt_tokens: int
+    ceiling_tokens: int
+    vram_ceiling_tokens: int
+    declared_window: int
+    binding_constraint: str
+    accepted: bool
+    reason: str
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "reader": self.reader,
+            "label": self.label,
+            "prompt_tokens": self.prompt_tokens,
+            "ceiling_tokens": self.ceiling_tokens,
+            "vram_ceiling_tokens": self.vram_ceiling_tokens,
+            "declared_context_window": self.declared_window,
+            "binding_constraint": self.binding_constraint,
+            "accepted": self.accepted,
+            "overflow_by": max(0, self.prompt_tokens - self.ceiling_tokens),
+            "reason": self.reason,
+        }
+
+
+def _check_capacity(reader: Any, prompt_tokens: int, *, label: str = "") -> CapacityVerdict:
+    """`LocalReader.check_capacity` as a REPORT rather than an exception.
+
+    `check_capacity` raises, which is right for a library and wrong for a loop
+    over a thousand cells: the run has to keep going and name every cell it
+    refused. The raise is caught here and the numbers the message carries are
+    recorded, so a rejection in `capacity.json` is legible without the original
+    traceback.
+    """
+    from msat.providers.local import ContextOverflowError
+
+    try:
+        limit = reader.check_capacity(prompt_tokens)
+    except ContextOverflowError as exc:
+        return CapacityVerdict(
+            reader=reader.id,
+            label=label,
+            prompt_tokens=prompt_tokens,
+            ceiling_tokens=reader.serving_limit_tokens,
+            vram_ceiling_tokens=reader.ceiling_tokens(),
+            declared_window=reader.declared_context_window,
+            binding_constraint=reader.binding_constraint,
+            accepted=False,
+            reason=str(exc),
+        )
+    return CapacityVerdict(
+        reader=reader.id,
+        label=label,
+        prompt_tokens=prompt_tokens,
+        ceiling_tokens=limit,
+        vram_ceiling_tokens=reader.ceiling_tokens(),
+        declared_window=reader.declared_context_window,
+        binding_constraint=reader.binding_constraint,
+        accepted=True,
+        reason=f"{prompt_tokens:,} prompt tokens fit the {limit:,}-token servable ceiling",
+    )
+
+
+def capacity_report(
+    verdicts: Sequence[CapacityVerdict],
+    *,
+    coverage: dict[str, Any] | None = None,
+    headroom: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Every rejection, with its prompt size, its ceiling, and what bound it."""
+    per_reader: dict[str, dict[str, Any]] = {}
+    for v in verdicts:
+        row = per_reader.setdefault(
+            v.reader,
+            {
+                "n_checked": 0,
+                "n_accepted": 0,
+                "n_rejected": 0,
+                "ceiling_tokens": v.ceiling_tokens,
+                "vram_ceiling_tokens": v.vram_ceiling_tokens,
+                "declared_context_window": v.declared_window,
+                "binding_constraint": v.binding_constraint,
+            },
+        )
+        row["n_checked"] += 1
+        row["n_accepted" if v.accepted else "n_rejected"] += 1
+    return {
+        "requirement": "PRD §R3.2",
+        "policy": "reject_cell — never truncate silently (retrieval.yaml context_policy)",
+        "on_overflow": "reject_cell",
+        "never_truncate_silently": True,
+        "n_checked": len(verdicts),
+        "n_accepted": sum(1 for v in verdicts if v.accepted),
+        "n_rejected": sum(1 for v in verdicts if not v.accepted),
+        "rejected": [v.as_dict() for v in verdicts if not v.accepted],
+        "per_reader": per_reader,
+        "panel_coverage": coverage,
+        "headroom_sensitivity": headroom,
+        "note": (
+            "A rejected cell is reported, not repaired. Trimming the prompt leaves it "
+            "able to contain its own answer while appearing not to, and the curve that "
+            "follows measures nothing (PRD §R0.3 — propose, never truncate)."
+        ),
+    }
+
+
+def _panel(bundle: Any) -> list[Any]:
+    """Every declared family as a `LocalReader`, with its ceiling COMPUTED.
+
+    Built from the same `readers.yaml` the config hash covers, so the panel the
+    run dispatches to is the panel that was hashed. `readers_from_config` refuses
+    a single-family panel (R7.5 needs a pair for R9.12 to mean anything).
+    """
+    from msat.providers.local import readers_from_config
+
+    try:
+        return readers_from_config(bundle.raw["readers.yaml"])
+    except (ValueError, KeyError) as exc:
+        _fail(f"the reader panel cannot be built: {exc}")
+        raise AssertionError("unreachable") from exc  # pragma: no cover
+
+
+def _capacity_preflight(bundle: Any, plan: Any, panel: Sequence[Any]) -> dict[str, Any]:
+    """R3.2 over every PLANNED cell, before anything is dispatched.
+
+    The prompt size here is the DECLARED model, because a planned cell has not been
+    rendered yet; at dispatch time the RENDERED prompt is measured instead. Both go
+    through `LocalReader.check_capacity`, so there is one ceiling and one reject
+    rule.
+
+    `design._prompt_tokens` is imported under its private name deliberately. It is
+    the single implementation of the declared prompt-size model, and a second copy
+    here is exactly how `design-power`'s feasibility numbers and the harness's
+    stop-dispatching numbers come to disagree about which cells fit.
+    """
+    from msat.design import _prompt_tokens as declared_prompt_tokens
+    from msat.providers.local import panel_coverage
+
+    pricing = bundle.pricing or {}
+    estimates = pricing.get("token_estimates", {})
+    overhead = float(pricing.get("prompt_overhead_tokens", 500))
+    chars_per_token = float(estimates.get("chars_per_token", 4.0))
+    by_id = {r.id: r for r in panel}
+
+    verdicts: list[CapacityVerdict] = []
+    for cell in plan.cells:
+        reader = by_id.get(cell.condition.reader)
+        if reader is None:
+            continue
+        anchors = estimates.get(cell.condition.scale) or estimates.get("S") or {}
+        if not anchors:
+            continue
+        prompt = int(
+            declared_prompt_tokens(
+                cell.k,
+                cell.b,
+                anchors,
+                overhead,
+                b_mode=cell.condition.b_mode,
+                corpus_tokens=anchors.get("corpus_tokens"),
+            )
+        )
+        verdicts.append(
+            _check_capacity(
+                reader,
+                prompt,
+                label=f"{cell.condition.scale}/{cell.condition.reader}/K={cell.k}/B={int(cell.b)}",
+            )
+        )
+
+    coverage = panel_coverage(
+        list(panel),
+        [(c.k, c.b, c.condition.scale) for c in plan.cells],
+    )
+    # D11: `headroom_gb` is a guess about fragmentation, not a physical constant,
+    # and on 8 GB it moves qwen from 20,889 to 2,682 tokens. Reported rather than
+    # resolved, because resolving it here would be picking a number nobody decided.
+    headroom = {r.id: r.ceiling_sensitivity() for r in panel}
+    report = capacity_report(verdicts, coverage=coverage, headroom=headroom)
+    report["prompt_tokens_model"] = (
+        f"declared design model, +{overhead:,.0f} tokens overhead, chars_per_token="
+        f"{chars_per_token} (ASSUMED). The RENDERED prompt is measured instead at "
+        f"dispatch time."
+    )
+    report["headroom_gb_is_open_decision"] = (
+        "D11. Every ceiling above moves with it: qwen's servable depth on 8 GB is "
+        "20,889 tokens at 0.8 GB of headroom and 2,682 at the 3.0 GB default. The "
+        "number nobody decided is the number that decides which cells run."
+    )
+    return report
+
+
+# ── the plan, and whether it is really CROSSED (PRD §R4.4) ────────────────────
+def _plan_from(manifest_path: Path, bundle: Any, qids: dict[str, list[str]]) -> Any:
+    """The executable plan for a manifest already on disk."""
+    from msat.planning import plan_from_manifest
+
+    return plan_from_manifest(
+        manifest_path,
+        qids,
+        seed=int(bundle.design.seed),
+        runs_per_cell=int(bundle.design.runs_per_cell),
+    )
+
+
+def _crossing(plan: Any, bundle: Any) -> tuple[dict[str, Any], int, list[dict[str, Any]]]:
+    """`verify_crossed_grid`, plus the two numbers the gate needs from it.
+
+    `n_interaction_cells` counts the `(K, B)` cells that are actually PRESENT for
+    every `(scale, reader)` block. It is the difference between branch (iv)
+    passing and branch (iv) never having run: `gate()` refuses to GO on an
+    unevaluated estimability check, which is the one thing it exists to refuse.
+
+    `degenerate_cells` is the gap list, shaped for the gate. A `missing` entry is
+    a cell the design declared and the plan will not execute — the R4.4 hole that
+    a per-reader K cap creates silently.
+    """
+    from msat.planning import verify_crossed_grid
+
+    design = bundle.design
+    report = verify_crossed_grid(
+        plan,
+        k_grid=design.K_grid,
+        b_grid=design.b_values,
+        scales=design.scales,
+        readers=design.readers,
+    )
+    per_block = len(design.K_grid) * len(design.b_values)
+    n_interaction_cells = per_block * sum(
+        1 for b in report["per_scale_reader"].values() if b["complete"]
+    )
+    degenerate: list[dict[str, Any]] = []
+    for block, row in sorted(report["per_scale_reader"].items()):
+        for k, b in row["missing"]:
+            degenerate.append({"scale_reader": block, "K": k, "B": b, "reason": "missing cell"})
+        for k, b in row["extra"]:
+            degenerate.append({"scale_reader": block, "K": k, "B": b, "reason": "undeclared cell"})
+    return report, n_interaction_cells, degenerate
+
+
+def _load_gold_sessions(path: Path) -> dict[str, list[str]]:
+    """`qid -> answer_session_ids`, read from `--questions`.
+
+    SESSION ids, never chunk ids. Gold is a property of a session and a memory is
+    a chunk of one, so a mapping keyed by chunk id would exclude the wrong thing
+    and let real evidence into the negative control.
+    """
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        _fail(f"{path} must be a JSON object mapping qid -> [answer_session_ids].")
+    return {str(k): [str(s) for s in v] for k, v in raw.items()}  # type: ignore[union-attr]
+
+
+# ── Arm E · the negative control, ACTUALLY RUN (PRD §R4.3 / §G5) ──────────────
+def load_control_pool(path: Path) -> tuple[Any, dict[str, str]]:
+    """Arm E's cross-question memory pool, from JSON.
+
+        {"q_target": {"question": "...", "memories": [
+             {"memory_id": "...", "session_id": "...", "text": "...", "n_tokens": 120}
+         ]}, ...}
+
+    Gold is NOT in here and must not be: it is `answer_session_ids`, passed
+    separately, and `draw_control_memories` derives the exclusion from it. A pool
+    that carried gold would let the control quietly keep the answer, which is the
+    one thing the negative control exists to detect.
+
+    Supplied as a file rather than built in-process so `msat run` does not have to
+    re-stream the 2.6 GB M split to check whether the pipeline is flattering
+    itself. The pool is what the write path (`memory.write`) already produced.
+    """
+    from msat.arms.negative import PooledMemory
+    from msat.arms.render import Memory
+
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        _fail(f"{path} must be a JSON object mapping qid -> {{question, memories}}.")
+    by_question: dict[str, list[Any]] = {}
+    question_text: dict[str, str] = {}
+    for qid, entry in raw.items():
+        if not isinstance(entry, dict) or "memories" not in entry:
+            _fail(f"{path}: entry {qid!r} must be an object with a `memories` list.")
+        question_text[str(qid)] = str(entry.get("question", ""))
+        memories = []
+        for raw_memory in entry["memories"]:  # type: ignore[index]
+            memories.append(
+                Memory(
+                    memory_id=str(raw_memory["memory_id"]),
+                    session_id=str(raw_memory["session_id"]),
+                    source_question_id=str(qid),
+                    text=str(raw_memory.get("text", "")),
+                    n_tokens=int(raw_memory.get("n_tokens", 0)),
+                )
+            )
+        by_question[str(qid)] = memories
+    return PooledMemory(by_question=by_question), question_text
+
+
+def _arm_e_cells(bundle: Any, scale: str) -> list[Any]:
+    """Arm E's cells: the SHALLOWEST declared `(K, B)`, once per reader.
+
+    The control has to detect a pipeline that flatters itself, and it detects that
+    at any cell. Running it at the cheapest one is the ladder's whole ordering
+    principle applied honestly: Arm E exists because it is the cheapest way to
+    discover the run is measuring nothing.
+    """
+    from msat.store.responses import ConditionKey
+
+    k0 = int(bundle.design.K_grid[0])
+    b0 = bundle.design.B_grid[0]
+    return [
+        ConditionKey("E", k0, float(b0.value), str(b0.mode), scale, reader)
+        for reader in bundle.design.readers
+    ]
+
+
+def run_negative_control(
+    *,
+    bundle: Any,
+    arm: Any,
+    cells: Sequence[Any],
+    readers: Sequence[Any],
+    pool: Any,
+    question_text: dict[str, str],
+    gold_by_question: dict[str, list[str]],
+    gold_answers: dict[str, str],
+    generate: Callable[[Any, Any], Any],
+    max_questions: int | None = None,
+) -> dict[str, Any]:
+    """Draw -> render -> check capacity -> generate -> score -> evaluate.
+
+    The whole arm, end to end, with `generate` as the single injected seam. That
+    is the same seam `runner/executor.Generator` uses, for the same reason: the
+    arm must be checkable without a GPU, or the check only happens on the
+    execution box.
+
+    Every refusal is RECORDED rather than raised. An overflowing prompt and an
+    under-filled control are both "this cell cannot be run as declared", and both
+    must be visible in the report instead of ending the arm at the first one.
+    """
+    from msat.arms.negative import ControlConfig, evaluate, go_no_go, render_control
+    from msat.metrics.normalisation import token_f1
+    from msat.providers.base import BackendUnavailableError
+
+    config = ControlConfig.from_template(
+        (bundle.prompts or {}).get("prompts/arm_e.j2") or (bundle.prompts or {}).get("arm_e.j2", "")
+    )
+    chars_per_token = float(
+        (bundle.pricing or {}).get("token_estimates", {}).get("chars_per_token", 4.0)
+    )
+    gold_sets = {q: frozenset(v) for q, v in gold_by_question.items()}
+    # Only questions that DECLARE GOLD are usable: recall is undefined without it
+    # (there is nothing to be a fraction of) and there is no answer to score the
+    # control against. Selecting the first pool entry alphabetically instead would
+    # silently pick a donor and report a control with n=0 as INCONCLUSIVE, which
+    # reads like a threshold problem rather than an input problem.
+    qids = [q for q in sorted(gold_sets) if gold_sets[q] and q in pool.by_question]
+    if max_questions is not None:
+        qids = qids[:max_questions]
+    if not qids:
+        _fail(
+            "no question has BOTH declared gold sessions and a pool entry, so Arm E "
+            "cannot be count-matched against anything. --questions and --arm-e-pool "
+            "must cover at least one common qid that declares `answer_session_ids`."
+        )
+
+    normaliser = _load_normaliser()
+    verdicts: list[CapacityVerdict] = []
+    refusals: list[dict[str, Any]] = []
+    draws: list[dict[str, Any]] = []
+    scores: list[float] = []
+    recalls: list[float] = []
+    backend_error: dict[str, Any] | None = None
+    n_generated = 0
+    n_unattributed = 0
+
+    for cell in cells:
+        reader = next((r for r in readers if r.id == cell.reader), None)
+        if reader is None:
+            continue
+        for qid in qids:
+            gold = gold_sets[qid]
+            label = f"E/{cell.scale}/{reader.id}/K={cell.k}/B={int(cell.b)}/{qid}"
+            try:
+                rendered = render_control(
+                    arm,
+                    question_text.get(qid, ""),
+                    pool,
+                    qid,
+                    gold,
+                    cell,
+                    config,
+                    budget_tokens=int(cell.b),
+                    qid=qid,
+                    gold_by_question=gold_sets,
+                )
+            except ValueError as exc:
+                # Under-filled control: fewer donors than K, so the control would
+                # collapse for the WRONG reason and the arm would "pass" while
+                # measuring nothing.
+                refusals.append(
+                    {
+                        "label": label,
+                        "kind": "underfilled_control",
+                        "reason": str(exc),
+                        "prompt_tokens": None,
+                        "ceiling_tokens": reader.serving_limit_tokens,
+                        "binding_constraint": reader.binding_constraint,
+                    }
+                )
+                continue
+
+            # ── R3.2, before dispatch ─────────────────────────────────────────
+            verdict = _check_capacity(
+                reader,
+                int(len(rendered.prompt) / chars_per_token) + 1,
+                label=label,
+            )
+            verdicts.append(verdict)
+            if not verdict.accepted:
+                refusals.append({**verdict.as_dict(), "kind": "context_overflow"})
+                continue
+
+            # ── the one seam this harness cannot cross without a GPU ─────────
+            # Everything above this line — draw, render, R3.2, the request body —
+            # is the production path and runs on any machine. Only the token
+            # generation needs an engine, and it is reported as exactly that: a
+            # missing backend is NOT a scientific verdict, and letting an
+            # ImportError escape here would present a missing optional dependency
+            # as a crashed experiment.
+            try:
+                result = generate(reader, _generation_request(bundle, reader, rendered))
+            except (BackendUnavailableError, ImportError, OSError) as exc:
+                backend_error = {
+                    "available": False,
+                    "reader": reader.id,
+                    "backend": str(getattr(reader, "backend_name", "transformers")),
+                    "error": type(exc).__name__,
+                    "detail": str(exc),
+                    "n_generated_before_failure": n_generated,
+                    "remedy": (
+                        "Arm E is generated by a LOCAL engine; there is no API reader "
+                        "in this design. Install `bitsandbytes` for the 4-bit path "
+                        "(uv sync --extra bits) or run vLLM as a service "
+                        "(make vllm), then re-run. `msat validate-config` reports "
+                        "backend availability without loading weights."
+                    ),
+                }
+                break  # a dead engine does not come back mid-loop
+
+            n_generated += 1
+            hits = sorted(set(rendered.session_ids) & gold)
+            draws.append(
+                {
+                    "label": label,
+                    "n_drawn": rendered.n_memories,
+                    "count_matched_to_K": rendered.n_memories == cell.k,
+                    "session_ids": list(rendered.session_ids),
+                    "gold_sessions_drawn": hits,
+                }
+            )
+            if gold:
+                recalls.append(len(hits) / len(gold))
+            answer = gold_answers.get(qid)
+            if answer is None:
+                n_unattributed += 1
+                continue
+            scores.append(token_f1(result.text, answer, normaliser))
+
+    accuracy = sum(scores) / len(scores) if scores else None
+    recall = sum(recalls) / len(recalls) if recalls else None
+    outcome = evaluate(accuracy, recall, config, n_questions=len(scores))
+    report: dict[str, Any] = {
+        **go_no_go(outcome),
+        "arm": "E",
+        "n_cells": len(cells),
+        "n_questions_considered": len(qids),
+        "n_generated": n_generated,
+        "n_refused": len(refusals),
+        "n_scored": len(scores),
+        "backend": backend_error
+        or {
+            "available": True,
+            "backend": str(getattr(readers[0], "backend_name", "transformers"))
+            if readers
+            else None,
+        },
+        "diagnostics": {
+            # `evaluate()` returns one INCONCLUSIVE reason for three different
+            # causes, and only one of them is null thresholds. A reader told "the
+            # thresholds are null" when the real problem is a gold file missing the
+            # question would go and edit the wrong file.
+            "accuracy_is_none_because": (
+                "no usable control output was scored" if accuracy is None else None
+            ),
+            "recall_is_none_because": (
+                "no drawn control carried a gold session, so recall is undefined"
+                if recall is None
+                else None
+            ),
+            "n_unattributed": n_unattributed,
+            "refusal_kinds": sorted({str(r.get("kind")) for r in refusals}),
+            "thresholds_measurable": config.thresholds_measurable,
+        },
+        "capacity": capacity_report(verdicts),
+        "refusals": refusals,
+        "control": {
+            "count_matched": all(d["count_matched_to_K"] for d in draws) if draws else None,
+            "mean_recall_of_gold": recall,
+            "mean_token_f1": accuracy,
+            "draws": draws,
+        },
+        "why_it_matters": (
+            "Arm E draws memories from OTHER questions, count-matched to the Arm A "
+            "condition so only the CONTENT differs. A correct reader scores near "
+            "zero. If it does not, the pipeline is not respecting the condition and "
+            "every other number in this project is suspect (PRD §R4.3 / §G5)."
+        ),
+    }
+    return report
+
+
+def _generation_request(bundle: Any, reader: Any, rendered: Any) -> Any:
+    """One `GenerationRequest`, from the DECODING config rather than a default.
+
+    Every field here is a confound that `decoding.yaml` exists to pin (R7.1-R7.4),
+    so reading them is the point; a default written at the call site would be a
+    second definition that agrees with the config until someone edits it.
+    """
+    from msat.providers.base import GenerationRequest
+
+    decoding = bundle.decoding
+    return GenerationRequest(
+        model=reader.model,
+        prompt=rendered.user,
+        system=rendered.system,
+        max_tokens=int(decoding.max_tokens),
+        temperature=float(decoding.temperature),
+        top_p=float(decoding.top_p),
+        stop=tuple(str(s) for s in decoding.stop_sequences),
+        seed=int(decoding.provider_seed),
+        request_id=rendered.arm,
+    )
+
+
+def _require_arm_e_inputs(
+    *, questions: Path | None, gold: Path | None, pool: Path | None
+) -> tuple[Path, Path, Path]:
+    """Every Arm E input, or a list of every one that is missing.
+
+    Reported TOGETHER rather than one at a time. A user invoking the negative
+    control for the first time is missing all three, and an error that names only
+    the first costs a round-trip per round-trip — which at 3am on day one is the
+    difference between a ten-second fix and an hour.
+
+    The backend is named in the same breath because it is also true and also
+    blocking: even with all three files, nothing is generated until a local engine
+    is loadable. Saying only half of it sends the reader to fix the wrong thing.
+    """
+    missing: list[str] = []
+    if questions is None:
+        missing.append(
+            "--questions (JSON: qid -> answer_session_ids. The control excludes "
+            "gold by SESSION id, and gold is derived from `answer_session_ids`, so "
+            "there is no default.)"
+        )
+    if gold is None:
+        missing.append(
+            "--gold (JSON: qid -> gold answer. The control's accuracy threshold is "
+            "a number, and a number needs something to be measured against.)"
+        )
+    if pool is None:
+        missing.append(
+            "--arm-e-pool (JSON cross-question memory pool: {qid: {question, "
+            "memories}}. A negative control is memories from OTHER questions, and "
+            "this harness will not invent them.)"
+        )
+    if not missing:
+        assert questions is not None and gold is not None and pool is not None
+        return questions, gold, pool
+
+    _fail(
+        "the Arm E rung is missing "
+        + ("input" if len(missing) == 1 else "inputs")
+        + ":\n    - "
+        + "\n    - ".join(missing)
+        + "\n  Generation also needs a backend: even with all three, nothing is "
+        "dispatched until a local engine (transformers / vLLM / onnxruntime-genai) "
+        "is loadable."
+    )
+    raise AssertionError("unreachable")  # pragma: no cover
+
+
+def _run_arm_e_rung(
+    run_dir: Path,
+    *,
+    bundle: Any,
+    registry: Any,
+    panel: Sequence[Any],
+    executable: Any,
+    questions: Path | None,
+    gold: Path | None,
+    pool: Path | None,
+    reader_id: str | None,
+    run_id: str,
+) -> Any:
+    """Execute the negative control and gate the run on it.
+
+    This is the ladder's first rung and the gate on the whole experiment. It runs
+    BEFORE any other arm, on purpose: it is the cheapest possible moment to
+    discover the pipeline is measuring nothing, and it costs one small arm.
+    """
+    from msat.runner.ladder import LADDER
+
+    questions, gold, pool = _require_arm_e_inputs(questions=questions, gold=gold, pool=pool)
+
+    chosen_readers = [r for r in panel if reader_id is None or r.id == reader_id]
+    if not chosen_readers:
+        _fail(f"unknown reader {reader_id!r}; the panel is {[r.id for r in panel]}")
+
+    rung = next(r for r in LADDER if r.name == "negative")
+    cells = _arm_e_cells(bundle, rung.scales[0])
+    control_arm = registry.get("E")
+    control_pool, question_text = load_control_pool(pool)
+
+    report = run_negative_control(
+        bundle=bundle,
+        arm=control_arm,
+        cells=cells,
+        readers=chosen_readers,
+        pool=control_pool,
+        question_text=question_text,
+        gold_by_question=_load_gold_sessions(questions),
+        gold_answers=_load_gold(gold),
+        generate=lambda reader, request: reader.generate(request),
+        max_questions=None if rung.n_questions < 0 else rung.n_questions,
+    )
+    _write_json(run_dir / "arm_e_control.json", report)
+    log.info(
+        "arm e control evaluated",
+        extra={
+            "run_id": run_id,
+            "config_hash": bundle.config_hash,
+            "arm": "E",
+            "verdict": report["verdict"],
+            "accuracy": report.get("accuracy"),
+            "recall": report.get("recall"),
+            "backend_available": bool(report["backend"]["available"]),
+        },
+    )
+    typer.echo(f"  wrote {run_dir / 'arm_e_control.json'}")
+
+    # A missing backend is NOT a verdict, and it is checked BEFORE the verdict is
+    # printed. `evaluate()` returns one INCONCLUSIVE reason for three different
+    # causes, so printing "the thresholds are null" when the real problem is an
+    # uninstalled optional dependency sends someone to edit the wrong file — and a
+    # broken dependency must never be readable as a scientific result.
+    backend = report["backend"]
+    if not backend["available"]:
+        _fail(
+            f"Arm E was drawn, rendered, capacity-checked and ready to dispatch, but "
+            f"reader {backend['reader']!r} has no loadable {backend['backend']} "
+            f"backend: {backend['error']}: {backend['detail']}\n"
+            f"  {backend['remedy']}\n"
+            f"  Nothing was simulated and no verdict is claimed. "
+            f"{run_dir / 'arm_e_control.json'} records what was built before the seam.",
+            code=EXIT_FAILURE,
+        )
+
+    typer.secho(
+        f"\n  arm E       {report['verdict']}   accuracy={report['accuracy']}  "
+        f"recall={report['recall']}  n={report['n_questions']}",
+        fg=typer.colors.GREEN if report["verdict"] == "PASS" else typer.colors.RED,
+        bold=True,
+    )
+    typer.echo(f"  {report['reason']}")
+    if report["n_refused"]:
+        typer.secho(
+            f"  {report['n_refused']} control unit(s) were REFUSED and are named in "
+            f"arm_e_control.json — a refused cell is reported, never truncated.",
+            fg=typer.colors.YELLOW,
+        )
+
+    # The gate re-decides, so `go_no_go.json` carries the negative control's
+    # verdict rather than leaving it in a sibling file nobody opens.
+    _, n_interaction_cells, degenerate_cells = _crossing(executable, bundle)
+    verdict = _evaluate_gate(
+        run_dir,
+        context=f"{run_id}/arm_e",
+        run_id=run_id,
+        config_hash=bundle.config_hash,
+        notes=[
+            f"Arm E negative control: {report['verdict']} — {report['reason']}",
+            "INCONCLUSIVE gates exactly like FAIL: proceeding on 'we don't know' is "
+            "how a broken pipeline gets twelve days of GPU time.",
+        ],
+        accuracy_by_cell={},
+        recall_by_k={},
+        stratified=None,
+        degenerate_cells=degenerate_cells,
+        n_interaction_cells=n_interaction_cells if report["verdict"] == "PASS" else 0,
+    )
+    if not report["proceed"]:
+        typer.secho(
+            "\n  !!! ARM E DID NOT COLLAPSE !!!\n"
+            "  The negative control draws memories from OTHER questions, so a correct\n"
+            "  reader scores near zero. A control that does not collapse means the\n"
+            "  pipeline is not respecting the condition it claims to manipulate — and\n"
+            "  that flatters every other arm measured through the same path.\n"
+            f"  {report['next']}",
+            fg=typer.colors.RED,
+            bold=True,
+            err=True,
+        )
+        _gate_exit(verdict, message="the negative control did not collapse (PRD §R4.3)")
+    return report
+
+
+# ── R8.5 · latency, from the store ─────────────────────────────────────────────
+def _latency_samples(store: Any) -> tuple[list[Any], dict[str, list[Any]], int]:
+    """Every stored response as a `LatencySample`, plus a per-reader split.
+
+    A record whose decomposition is impossible (`ttft_ms` below the queue wait)
+    is COUNTED and reported rather than allowed to raise. `LatencySample` rejects
+    it deliberately — it is a bug in the client — and a reporting command that
+    crashes on one bad record has stopped reporting on the other 189,000.
+    """
+    from msat.metrics.latency import LatencySample
+
+    total: list[Any] = []
+    by_reader: dict[str, list[Any]] = {}
+    n_impossible = 0
+    for record in store.iter_all():
+        try:
+            sample = LatencySample(
+                latency_ms=record.latency_ms,
+                queue_wait_ms=record.queue_wait_ms,
+                ttft_ms=record.ttft_ms,
+            )
+        except ValueError:
+            n_impossible += 1
+            continue
+        total.append(sample)
+        by_reader.setdefault(str(record.condition.get("reader", "unknown")), []).append(sample)
+    return total, by_reader, n_impossible
+
+
+def _ttft_samples(samples: Sequence[Any]) -> list[Any]:
+    """TTFT as its OWN sample stream (PRD §R8.5).
+
+    Reported separately from total latency because they measure different things:
+    `ttft_ms` is queue wait -> first token, `latency_ms` is queue wait -> last
+    token. Quoting one as the other is how a p50 of 200 ms and a p99 of 4 s gets
+    read as server slowness when it is the generator's own tail.
+    """
+    from msat.metrics.latency import LatencySample
+
+    return [
+        LatencySample(
+            latency_ms=s.ttft_ms,
+            queue_wait_ms=s.queue_wait_ms,
+            ttft_ms=s.ttft_ms,
+        )
+        for s in samples
+        if s.ttft_ms is not None and s.ttft_ms > 0
+    ]
+
+
+def latency_artifact(store: Any) -> dict[str, Any]:
+    """R8.5's report: medians, IQR and quantiles; TTFT separate from total.
+
+    There is no bootstrap CI on the mean anywhere in this artifact, and there is
+    none available to add: `metrics/latency.py` reports the shape rather than an
+    interval whose width is set by the tail.
+    """
+    from msat.metrics.latency import latency_report, summarise_latency
+
+    total, by_reader, n_impossible = _latency_samples(store)
+    ttft = _ttft_samples(total)
+    return {
+        "requirement": "PRD §R8.5",
+        "total_latency": latency_report(total, by_label=dict(by_reader)),
+        "ttft": summarise_latency(ttft, label="ttft").as_dict(),
+        "ttft_is_separate_because": (
+            "ttft_ms is queue_wait -> first token and latency_ms is queue_wait -> last "
+            "token. They measure different things, so they are summarised separately; "
+            "the total is a property of the generator's tail, the TTFT is a property "
+            "of the reader (PRD §R5.3)."
+        ),
+        "n_impossible_records": n_impossible,
+        "n_latency_samples": len(total),
+        "no_bootstrap_ci": (
+            "Deliberately absent. A bootstrap CI on a heavy-tailed mean reports "
+            "uncertainty about a statistic nobody should quote (PRD §R8.5)."
+        ),
+    }
+
+
+def _print_latency(artifact: dict[str, Any]) -> None:
+    """The R8.5 table: median, IQR and quantiles, for total and TTFT apart."""
+    overall = artifact["total_latency"]["overall"]
+    ttft = artifact["ttft"]
+    typer.secho(
+        "\n  latency (R8.5) — medians, IQR and quantiles; never a bootstrap CI",
+        fg=typer.colors.CYAN,
+    )
+    typer.echo(f"    {'series':<10}{'n':>7}{'p50':>10}{'IQR':>10}{'p90':>10}{'p99':>11}   mean")
+    for label, block in (("total", overall), ("ttft", ttft)):
+        q = block["quantiles_ms"]
+        typer.echo(
+            f"    {label:<10}{block['n']:>7}{q.get('p50', 0):>10,.0f}"
+            f"{block['iqr_ms']:>10,.0f}{q.get('p90', 0):>10,.0f}{q.get('p99', 0):>11,.0f}"
+            f"{block['mean_ms']:>10,.0f}"
+        )
+    if ttft["n"] == 0:
+        typer.secho(
+            "    no TTFT was recorded on any response, so the reader's own latency to "
+            "first token is unreported rather than inferred.",
+            fg=typer.colors.YELLOW,
+        )
+    if not ttft["p99_reliable"]:
+        typer.secho(
+            f"    p99 rests on n={ttft['n']}; below ~100 calls it is one or two "
+            f"observations and reads as a precise number.",
+            fg=typer.colors.YELLOW,
+        )
+    for reader, block in sorted(artifact["total_latency"].get("by_reader", {}).items()):
+        typer.echo(
+            f"      {reader:<8} p50 {block['quantiles_ms'].get('p50', 0):>9,.0f} ms   "
+            f"IQR {block['iqr_ms']:>9,.0f} ms   n={block['n']}"
+        )
+    queue = artifact["total_latency"]["queue_wait"]
+    if queue["recorded"] and not queue["recording_concurrency"]:
+        typer.secho(
+            f"    queue wait is {100 * queue['share_of_latency']:.0f}% of total latency, "
+            f"so `total` describes THIS HARNESS, not the reader. Use `queue_excluded_*` "
+            f"to compare readers.",
+            fg=typer.colors.YELLOW,
+        )
+    if artifact["n_impossible_records"]:
+        typer.secho(
+            f"    {artifact['n_impossible_records']} record(s) declare a TTFT below "
+            f"their queue wait and were EXCLUDED rather than repaired.",
+            fg=typer.colors.YELLOW,
+        )
 
 
 @app.command("status")
@@ -1049,6 +2225,8 @@ def score(
                            R8.3, because the metric code will change and a stored
                            aggregate cannot be re-derived under a new one.
     `disagreements.parquet` per-item rows where judges differ, WITH their content.
+    `latency.json`          medians, IQR and quantiles from the SAME records, with
+                           TTFT summarised separately from total (R8.5).
 
     Normalisation comes from `configs/prompts/normalisation.yaml` (R1.2), not from
     this code. A `lower()` written here would be a second definition, and the two
@@ -1058,7 +2236,7 @@ def score(
     evaluator is supplied via `--official`; without it the run says so, because a
     two-metric table is indistinguishable from a three-metric one in the artifact.
 
-    PRD §R8.1, §R8.4, §G4.
+    PRD §R8.1, §R8.4, §R8.5, §G4.
     """
     from msat.metrics.score import (
         build_disagreements,
@@ -1113,6 +2291,16 @@ def score(
     for note in report.notes:
         typer.secho(f"  note: {note}", fg=typer.colors.YELLOW)
     typer.echo(f"\n  wrote {dest}")
+
+    # ── R8.5 · latency, reduced from the SAME records ────────────────────────
+    # `store/responses.py` has carried `latency_ms` / `ttft_ms` / `queue_wait_ms`
+    # since P4 and nothing read them: the run's timing data was stored, summarised
+    # by nobody, and a bootstrap CI on the mean was the only thing anyone would
+    # have written by hand. Median, IQR and quantiles are what R8.5 asks for.
+    latency = latency_artifact(store)
+    latency_dest = _write_json(run_dir / "latency.json", latency)
+    _print_latency(latency)
+    typer.echo(f"  wrote {latency_dest}")
 
     # R8.3 — per-item disagreements, WITH their content. Written only when judge
     # verdicts exist, and the absence is stated rather than leaving a missing file
@@ -1183,7 +2371,7 @@ def judge_audit(
     """
     from msat.judges.report import build_audit, format_audit
 
-    _resolve_run_id(run_id, run)
+    resolved = _resolve_run_id(run_id, run)
     _assert_offline("judge-audit")
     if verdicts_path is None or not Path(verdicts_path).exists():
         _fail(
@@ -1197,8 +2385,52 @@ def judge_audit(
     dest = audit.write(Path(out))
     typer.echo(format_audit(audit))
     typer.echo(f"\n  wrote {dest}")
+
+    # ── the P5 gate, from `gate.py` ──────────────────────────────────────────
+    # The panel's usability is decided here and nowhere else, and the exit code
+    # follows `GateVerdict.proceed` rather than a second `if audit.panel_usable`.
+    # The audit's flip rate becomes the judge's noise FLOOR, which is what branch
+    # (i) is measured against — a 6pp grid spread means nothing if the panel itself
+    # moves 8pp on identical outputs.
+    floor = audit.noise_floor or 0.0
+    gate_verdict = _evaluate_gate(
+        dest.parent,
+        context=f"{resolved}/judge_audit",
+        run_id=resolved,
+        config_hash="",
+        notes=[
+            f"Judge panel: kappa_min={audit.panel.get('kappa_min')} against a bar of "
+            f"{audit.panel.get('cautionary_bar')}, {audit.n_judges} judge(s), "
+            f"{audit.n_items:,} item(s).",
+            "Branches (i)-(iii) are empty because this command reads verdict records "
+            "only (R8.7): it is a STANDALONE artefact and does not need scores.",
+        ],
+        accuracy_by_cell={},
+        recall_by_k={},
+        stratified=None,
+        degenerate_cells=(
+            [] if audit.panel_usable else [{"judge_pair": p} for p in _unusable_pairs(audit)]
+        ),
+        n_interaction_cells=0,
+        judge_floor_pp=100.0 * floor,
+    )
     if not audit.panel_usable:
-        raise typer.Exit(code=EXIT_NO_GO)
+        _gate_exit(gate_verdict, message="the judge panel is not usable (PRD §R8.2)")
+
+
+def _unusable_pairs(audit: Any) -> list[str]:
+    """Which judge pairs failed kappa, named rather than counted.
+
+    `kappa_min` alone says the panel is weak; the pair says why, and the reason is
+    the thing someone has to go and fix. `panel_agreement` has already rendered
+    each pair's verdict in words, so that is read rather than re-derived here.
+    """
+    panel = getattr(audit, "panel", {}) or {}
+    return [
+        str(entry.get("pair", "?"))
+        for entry in panel.get("verdicts", []) or []
+        if "BELOW" in str(entry.get("verdict", "")) or "UNDEFINED" in str(entry.get("verdict", ""))
+    ]
 
 
 def _load_gold(path: Path) -> dict[str, str]:

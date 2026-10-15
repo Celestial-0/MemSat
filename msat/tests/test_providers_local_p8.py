@@ -74,8 +74,16 @@ FAMILY = {
 
 
 def _reader(**over: Any) -> LocalReader:
+    # `backend` is a KEYWORD of `reader_from_family`, not a field of the family
+    # mapping. Passing it in `over` put it in the family dict, where it was read
+    # by nothing - so `_reader(backend="does-not-exist")` silently built a
+    # `transformers` reader, the engine answered `ready: True`, and the test
+    # below was asserting about a backend that was never selected. Routed
+    # explicitly now, because a test that cannot see the thing it names is not
+    # a test.
+    backend = over.pop("backend", "transformers")
     fam = {**FAMILY, **over}
-    return reader_from_family(fam, card_gb=24.0)
+    return reader_from_family(fam, card_gb=24.0, backend=backend)
 
 
 # ── the ceiling is computed, and the unit conversion happens exactly once ──────

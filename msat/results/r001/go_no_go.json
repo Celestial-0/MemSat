@@ -1,0 +1,68 @@
+{
+  "branches": [
+    {
+      "branch": "(iv) K x B interaction estimable",
+      "detail": "all 108 (K, B) cells are estimable",
+      "observed": {
+        "n_cells_checked": 108,
+        "n_degenerate_cells": 0
+      },
+      "passed": true,
+      "threshold": {
+        "max_degenerate_cells": 0,
+        "min_cells_checked": 1
+      }
+    },
+    {
+      "branch": "(i) accuracy varies >= 5pp",
+      "detail": "no accuracy data; branch cannot pass on absent input",
+      "observed": null,
+      "passed": false,
+      "threshold": {
+        "pp": 5.0
+      }
+    },
+    {
+      "branch": "(ii) recall@K varies >= 10pp",
+      "detail": "no recall data; branch cannot pass on absent input",
+      "observed": null,
+      "passed": false,
+      "threshold": {
+        "pp": 10.0
+      }
+    },
+    {
+      "branch": "(iii) stratified structure",
+      "detail": "not computed; a stratification that was not run cannot pass",
+      "observed": null,
+      "passed": false,
+      "threshold": {
+        "rule": "multi-session rising while single-session flat/declining"
+      }
+    }
+  ],
+  "context": "r001/preflight",
+  "degenerate_cells": [],
+  "interaction_estimable": true,
+  "judge_floor_pp": 0.0,
+  "n_cells": 0,
+  "n_interaction_cells": 108,
+  "n_questions": 0,
+  "note": "A BOUNDED_NEGATIVE is a result, not a failure, and it is decided with the Guide IN ADVANCE (IMPLEMENTATION_PLAN.md \u00a76) rather than discovered after the budget is spent.",
+  "notes": [
+    "Branch (i) had no accuracy data. A missing measurement is not a pass.",
+    "Branch (ii) had no recall data.",
+    "Pre-run gate. Branches (i)-(iii) are empty because no output has been generated yet; branch (iv) is a property of the DESIGN and is decided here, before a single token is spent."
+  ],
+  "outcome": "GO",
+  "passed_branches": [
+    "(iv) K x B interaction estimable"
+  ],
+  "pivot_if_negative": [
+    "ceiling analysis (already built)",
+    "stratification by question type (already built)",
+    "judge audit (P6)",
+    "cost model (P2)"
+  ],
+  "proceed": true
+}

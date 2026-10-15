@@ -52,6 +52,7 @@ from msat.design import (
     mde_interaction,
     propose_reduced_design,
 )
+from msat.hardware.vram import DEFAULT_HEADROOM_GB
 
 #: Column names matching the simulated design matrix, for the report.
 _COLUMNS: dict[str, int] = {
@@ -66,8 +67,22 @@ _COLUMNS: dict[str, int] = {
 
 #: The card the design is sized against (blocker B7's wall-clock budget).
 VRAM_GB: float = 8.0
-OVERHEAD_GB: float = 0.5
-"""CUDA context, activations, allocator slack. Not weight and not KV cache."""
+OVERHEAD_GB: float = DEFAULT_HEADROOM_GB
+"""Single source of truth: `hardware.vram.DEFAULT_HEADROOM_GB`.
+
+This used to be a local `0.5` whose docstring claimed to cover "CUDA context,
+activations, allocator slack" -- the identical scope `vram.py` covered with `3.0`.
+One constant said deep cells were servable and the other said they were not, which
+is the whole of D11: not a modelling disagreement, a duplicated number. Both paths
+now resolve to the same value, so the feasibility report and the runtime capacity
+preflight cannot disagree about a reader's ceiling.
+
+Which VALUE is right remains an open decision, and `design.headroom_that_fits`
+reports the threshold at which the full grid becomes executable rather than leaving
+it to preference. A too-small number here does not fail safely: `retrieval.yaml`
+sets `never_truncate_silently: true` and `on_overflow: reject_cell`, so the
+optimistic value turns into an OOM at hour 14 instead of a refusal at hour 0.
+"""
 
 
 def _reader_limit(family: ReaderFamily) -> ReaderLimit:

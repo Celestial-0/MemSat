@@ -368,10 +368,18 @@ class LocalReader:
         The family's own facts are reported even when the engine is unavailable - a
         reader debugging a refused run needs to know the ceiling, and an engine error
         alone does not say it.
+
+        Catches `ValueError` as well as `BackendUnavailableError`, because
+        `select_backend` raises `ValueError` for a backend name it does not know -
+        which is the same situation by another route. Without it, a typo in
+        `backend_name` turned a preflight report into a traceback, and the one
+        command whose job is to explain what is wrong could not explain this.
         """
         try:
             engine = self.backend().health()
         except BackendUnavailableError as exc:
+            engine = {"ready": False, "reason": str(exc)}
+        except ValueError as exc:
             engine = {"ready": False, "reason": str(exc)}
         return {
             **self.reader_metadata(),
