@@ -1,0 +1,413 @@
+{
+  "_cross_scale_full_context": {
+    "1": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "12": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "16": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "2": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "24": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "3": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "32": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "4": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "48": {
+      "M": 0.0,
+      "S": 0.104
+    },
+    "6": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "64": {
+      "M": 0.0,
+      "S": 0.0
+    },
+    "8": {
+      "M": 0.0,
+      "S": 0.0
+    }
+  },
+  "_key_semantics": {
+    "analytic_saturation_k": "K* = min{K : ceiling(K) >= 0.995}. Beyond it, no retriever can add evidence; all change is reader-side.",
+    "ceiling": "Pr(|answer_session_ids| <= K) — max recall@K for a PERFECT retriever.",
+    "corpus_fraction_ratio": "K / |corpus| per question. 1.0 means full-context.",
+    "degeneracy_fraction[K]": "Fraction of questions with K >= their own corpus size. Degenerate = the condition has silently become full-context.",
+    "partial": "Mean fraction of evidence retrievable within K.",
+    "survivors_at": "Fraction of questions whose corpus has >= K sessions. NOT 'fraction degenerate' — the complement is, and is emitted as degeneracy_fraction."
+  },
+  "_provenance": {
+    "api_calls": 0,
+    "float_dp": 6,
+    "grid": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      12,
+      16,
+      24,
+      32,
+      48,
+      64
+    ],
+    "ratio": "K / |corpus| where |corpus| = n_sessions for that question"
+  },
+  "scales": {
+    "M": {
+      "corpus_size": {
+        "max": 490,
+        "mean": 475.31,
+        "min": 460
+      },
+      "n_questions": 500,
+      "per_k": {
+        "1": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.002174,
+            "min": 0.002041,
+            "p10": 0.002075,
+            "p25": 0.002088,
+            "p50": 0.002101,
+            "p75": 0.002119,
+            "p90": 0.002132
+          }
+        },
+        "12": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.026087,
+            "min": 0.02449,
+            "p10": 0.024896,
+            "p25": 0.025052,
+            "p50": 0.02521,
+            "p75": 0.025424,
+            "p90": 0.025586
+          }
+        },
+        "16": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.034783,
+            "min": 0.032653,
+            "p10": 0.033195,
+            "p25": 0.033403,
+            "p50": 0.033613,
+            "p75": 0.033898,
+            "p90": 0.034115
+          }
+        },
+        "2": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.004348,
+            "min": 0.004082,
+            "p10": 0.004149,
+            "p25": 0.004175,
+            "p50": 0.004202,
+            "p75": 0.004237,
+            "p90": 0.004264
+          }
+        },
+        "24": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.052174,
+            "min": 0.04898,
+            "p10": 0.049793,
+            "p25": 0.050104,
+            "p50": 0.05042,
+            "p75": 0.050847,
+            "p90": 0.051173
+          }
+        },
+        "3": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.006522,
+            "min": 0.006122,
+            "p10": 0.006224,
+            "p25": 0.006263,
+            "p50": 0.006303,
+            "p75": 0.006356,
+            "p90": 0.006397
+          }
+        },
+        "32": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.069565,
+            "min": 0.065306,
+            "p10": 0.06639,
+            "p25": 0.066806,
+            "p50": 0.067227,
+            "p75": 0.067797,
+            "p90": 0.06823
+          }
+        },
+        "4": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.008696,
+            "min": 0.008163,
+            "p10": 0.008299,
+            "p25": 0.008351,
+            "p50": 0.008403,
+            "p75": 0.008475,
+            "p90": 0.008529
+          }
+        },
+        "48": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.104348,
+            "min": 0.097959,
+            "p10": 0.099585,
+            "p25": 0.100209,
+            "p50": 0.10084,
+            "p75": 0.101695,
+            "p90": 0.102345
+          }
+        },
+        "6": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.013043,
+            "min": 0.012245,
+            "p10": 0.012448,
+            "p25": 0.012526,
+            "p50": 0.012605,
+            "p75": 0.012712,
+            "p90": 0.012793
+          }
+        },
+        "64": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.13913,
+            "min": 0.130612,
+            "p10": 0.13278,
+            "p25": 0.133612,
+            "p50": 0.134454,
+            "p75": 0.135593,
+            "p90": 0.136461
+          }
+        },
+        "8": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.017391,
+            "min": 0.016327,
+            "p10": 0.016598,
+            "p25": 0.016701,
+            "p50": 0.016807,
+            "p75": 0.016949,
+            "p90": 0.017058
+          }
+        }
+      }
+    },
+    "S": {
+      "corpus_size": {
+        "max": 62,
+        "mean": 47.734,
+        "min": 38
+      },
+      "n_questions": 500,
+      "per_k": {
+        "1": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.026316,
+            "min": 0.016129,
+            "p10": 0.019231,
+            "p25": 0.02,
+            "p50": 0.020833,
+            "p75": 0.022222,
+            "p90": 0.022727
+          }
+        },
+        "12": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.315789,
+            "min": 0.193548,
+            "p10": 0.230769,
+            "p25": 0.24,
+            "p50": 0.25,
+            "p75": 0.266667,
+            "p90": 0.272727
+          }
+        },
+        "16": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.421053,
+            "min": 0.258065,
+            "p10": 0.307692,
+            "p25": 0.32,
+            "p50": 0.333333,
+            "p75": 0.355556,
+            "p90": 0.363636
+          }
+        },
+        "2": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.052632,
+            "min": 0.032258,
+            "p10": 0.038462,
+            "p25": 0.04,
+            "p50": 0.041667,
+            "p75": 0.044444,
+            "p90": 0.045455
+          }
+        },
+        "24": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.631579,
+            "min": 0.387097,
+            "p10": 0.461538,
+            "p25": 0.48,
+            "p50": 0.5,
+            "p75": 0.533333,
+            "p90": 0.545455
+          }
+        },
+        "3": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.078947,
+            "min": 0.048387,
+            "p10": 0.057692,
+            "p25": 0.06,
+            "p50": 0.0625,
+            "p75": 0.066667,
+            "p90": 0.068182
+          }
+        },
+        "32": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.842105,
+            "min": 0.516129,
+            "p10": 0.615385,
+            "p25": 0.64,
+            "p50": 0.666667,
+            "p75": 0.711111,
+            "p90": 0.727273
+          }
+        },
+        "4": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.105263,
+            "min": 0.064516,
+            "p10": 0.076923,
+            "p25": 0.08,
+            "p50": 0.083333,
+            "p75": 0.088889,
+            "p90": 0.090909
+          }
+        },
+        "48": {
+          "frac_full_context": 0.104,
+          "frac_k_gt_corpus": 0.496,
+          "quantiles": {
+            "max": 1.263158,
+            "min": 0.774194,
+            "p10": 0.923077,
+            "p25": 0.96,
+            "p50": 1.0,
+            "p75": 1.066667,
+            "p90": 1.090909
+          }
+        },
+        "6": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.157895,
+            "min": 0.096774,
+            "p10": 0.115385,
+            "p25": 0.12,
+            "p50": 0.125,
+            "p75": 0.133333,
+            "p90": 0.136364
+          }
+        },
+        "64": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 1.0,
+          "quantiles": {
+            "max": 1.684211,
+            "min": 1.032258,
+            "p10": 1.230769,
+            "p25": 1.28,
+            "p50": 1.333333,
+            "p75": 1.422222,
+            "p90": 1.454545
+          }
+        },
+        "8": {
+          "frac_full_context": 0.0,
+          "frac_k_gt_corpus": 0.0,
+          "quantiles": {
+            "max": 0.210526,
+            "min": 0.129032,
+            "p10": 0.153846,
+            "p25": 0.16,
+            "p50": 0.166667,
+            "p75": 0.177778,
+            "p90": 0.181818
+          }
+        }
+      }
+    }
+  }
+}

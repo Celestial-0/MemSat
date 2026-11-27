@@ -1,0 +1,1285 @@
+{
+  "_method": {
+    "NOT_used": "MixedLM — it is LINEAR and silently accepts a 0/1 outcome with no error (PRD §6.1 verified trap)",
+    "covariates": "corpus_fraction and the question count are fitted to the REAL per-question corpus distribution measured in P1",
+    "cross_checked_against": "statsmodels.genmod GEE — agreement to 6 dp (tests/test_design_power.py::test_estimator_matches_statsmodels_gee)",
+    "estimator": "logit GLM with cluster-robust (sandwich) SE by question; equivalent to statsmodels GEE with independence working correlation",
+    "modelled_not_measured": "gold_rank (a property of the retrieval manifest, which does not exist until P5)",
+    "pairing": "every question is measured at every cell — treating conditions as independent would inflate the SE",
+    "predictors_centred": "log2(K) at 3.0, log2(B) at 14.0 — a reparameterisation of PRD §R9.1, not a different model; uncentred log2(B) spans 12..16 and would sit the baseline near 98% accuracy"
+  },
+  "_provenance": {
+    "alpha": 0.05,
+    "api_calls": 0,
+    "config_hash": "0662bbcf0259b3a143f61b5f9c11fe439ac252977d2e4413800680823b480412",
+    "generated_by": "msat design-power",
+    "n_sim_per_point": 30,
+    "preregistered_sign": "approximately_zero",
+    "preregistration_hash": "2d8af1a6e245e17be29918308a539b07a7687a1b64882ebd8b56925d8ac75580",
+    "seed": 20261012,
+    "target_power": 0.8
+  },
+  "budget_guard": {
+    "enforceable": false,
+    "estimate_usd": 0.0,
+    "note": "blocker B7 — the approved ceiling was set for a 1-factor sweep. This estimate is the INPUT to the budget conversation; no run may be launched until the guide sets it.",
+    "state": "pending_guide_signoff"
+  },
+  "compute_budget": {
+    "assumptions": {
+      "batch_size": 8,
+      "decode_tokens_per_sec_aggregate": 300.0,
+      "dtype": "4bit",
+      "prefill_tokens_per_sec": 8000.0,
+      "status": "ASSUMED — must be benchmarked on the target machine before P5"
+    },
+    "available": true,
+    "judge_audit_hours": 37.5,
+    "judge_hours": 37.5,
+    "judge_share_of_total": 0.444,
+    "max_wall_clock_hours": 336.0,
+    "multiple_of_budget": 0.25,
+    "n_calls": 81000,
+    "per_reader": {
+      "gemma": {
+        "calls": 27000,
+        "hours": 3.1
+      },
+      "phi": {
+        "calls": 27000,
+        "hours": 3.1
+      },
+      "qwen": {
+        "calls": 27000,
+        "hours": 3.1
+      }
+    },
+    "reader_hours": 9.4,
+    "total_days": 3.5,
+    "total_hours": 84.4,
+    "within_budget": true
+  },
+  "context_feasibility": {
+    "infeasible_cells": {
+      "qwen": [
+        {
+          "B": 512.0,
+          "B_mode": "per_memory_tokens",
+          "K": 8,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 1914,
+          "prompt_tokens": 4596,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "S",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 256.0,
+          "B_mode": "per_memory_tokens",
+          "K": 16,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 1914,
+          "prompt_tokens": 4596,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "S",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 512.0,
+          "B_mode": "per_memory_tokens",
+          "K": 16,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 6010,
+          "prompt_tokens": 8692,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "S",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 128.0,
+          "B_mode": "per_memory_tokens",
+          "K": 32,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 1914,
+          "prompt_tokens": 4596,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "S",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 256.0,
+          "B_mode": "per_memory_tokens",
+          "K": 32,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 6010,
+          "prompt_tokens": 8692,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "S",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 512.0,
+          "B_mode": "per_memory_tokens",
+          "K": 32,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 14202,
+          "prompt_tokens": 16884,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "S",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 512.0,
+          "B_mode": "per_memory_tokens",
+          "K": 8,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 1914,
+          "prompt_tokens": 4596,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "M",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 256.0,
+          "B_mode": "per_memory_tokens",
+          "K": 16,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 1914,
+          "prompt_tokens": 4596,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "M",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 512.0,
+          "B_mode": "per_memory_tokens",
+          "K": 16,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 6010,
+          "prompt_tokens": 8692,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "M",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 128.0,
+          "B_mode": "per_memory_tokens",
+          "K": 32,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 1914,
+          "prompt_tokens": 4596,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "M",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 256.0,
+          "B_mode": "per_memory_tokens",
+          "K": 32,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 6010,
+          "prompt_tokens": 8692,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "M",
+          "vram_capacity_tokens": 2682
+        },
+        {
+          "B": 512.0,
+          "B_mode": "per_memory_tokens",
+          "K": 32,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "context_window": 262144,
+          "overflow_by": 14202,
+          "prompt_tokens": 16884,
+          "reader": "qwen",
+          "reader_capacity_tokens": 2682,
+          "scale": "M",
+          "vram_capacity_tokens": 2682
+        }
+      ]
+    },
+    "n_infeasible": 12,
+    "policy": "reject_cell — never truncate silently (PRD §R3.2)",
+    "prompt_overhead_tokens": 500.0,
+    "readers": {
+      "gemma": {
+        "blocked_by": "vram",
+        "context_window": 131072,
+        "kv_mb_per_1k": 82.03125,
+        "largest_prompt": 16884,
+        "reader_capacity_tokens": 36326,
+        "vram_capacity_tokens": 36326,
+        "weight_gb": 2.0489096641540527
+      },
+      "phi": {
+        "blocked_by": "vram",
+        "context_window": 131072,
+        "kv_mb_per_1k": 125.0,
+        "largest_prompt": 16884,
+        "reader_capacity_tokens": 24502,
+        "vram_capacity_tokens": 24502,
+        "weight_gb": 1.9464641809463503
+      },
+      "qwen": {
+        "blocked_by": "vram",
+        "context_window": 262144,
+        "kv_mb_per_1k": 125.0,
+        "largest_prompt": 16884,
+        "reader_capacity_tokens": 2682,
+        "vram_capacity_tokens": 2682,
+        "weight_gb": 4.610046744346619
+      }
+    }
+  },
+  "corpus_distribution_measured": {
+    "M": {
+      "max": 490,
+      "median": 476.0,
+      "min": 460,
+      "mu": 6.163911928784674,
+      "n": 500,
+      "sigma": 0.010529932055122515
+    },
+    "S": {
+      "max": 62,
+      "median": 48.0,
+      "min": 38,
+      "mu": 3.8630223830458053,
+      "n": 500,
+      "sigma": 0.07241177322376637
+    }
+  },
+  "cost": {
+    "_note": "ESTIMATE. Prices are provisional until verified against an invoice.",
+    "cost_cache_adjusted_total_usd": 0.0,
+    "cost_uncached_total_usd": 0.0,
+    "mean_cost_per_cell_usd": 0.0,
+    "most_expensive_cell": {
+      "B": 128.0,
+      "B_mode": "per_memory_tokens",
+      "K": 1,
+      "arm": "A+G",
+      "calls": 1500,
+      "cost_usd": 0.0,
+      "output_tokens": 80,
+      "pricing_model": "google/gemma-4-E4B-it",
+      "prompt_tokens": 400,
+      "reader": "gemma",
+      "scale": "S"
+    },
+    "n_calls": 81000,
+    "n_cells": 54,
+    "n_cells_priced": 54,
+    "per_cell": [
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 400,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 400,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 400,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 705,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 705,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 705,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 1242,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 1242,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 1242,
+        "reader": "gemma",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 400,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 400,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 400,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 705,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 705,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 705,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 1242,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 1242,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 1242,
+        "reader": "qwen",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 400,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 400,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 400,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 705,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 705,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 705,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 1242,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 1242,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 1242,
+        "reader": "phi",
+        "scale": "S"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 2000,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 2000,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 2000,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 3957,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 3957,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 3957,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 7829,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 7829,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "google/gemma-4-E4B-it",
+        "prompt_tokens": 7829,
+        "reader": "gemma",
+        "scale": "M"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 2000,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 2000,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 2000,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 3957,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 3957,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 3957,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 7829,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 7829,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "Qwen/Qwen3.5-9B",
+        "prompt_tokens": 7829,
+        "reader": "qwen",
+        "scale": "M"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 2000,
+        "reader": "phi",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 2000,
+        "reader": "phi",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 1,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 2000,
+        "reader": "phi",
+        "scale": "M"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 3957,
+        "reader": "phi",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 3957,
+        "reader": "phi",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 2,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 3957,
+        "reader": "phi",
+        "scale": "M"
+      },
+      {
+        "B": 128.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 7829,
+        "reader": "phi",
+        "scale": "M"
+      },
+      {
+        "B": 256.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 7829,
+        "reader": "phi",
+        "scale": "M"
+      },
+      {
+        "B": 512.0,
+        "B_mode": "per_memory_tokens",
+        "K": 4,
+        "arm": "A+G",
+        "calls": 1500,
+        "cost_usd": 0.0,
+        "output_tokens": 80,
+        "pricing_model": "microsoft/Phi-4-mini-instruct",
+        "prompt_tokens": 7829,
+        "reader": "phi",
+        "scale": "M"
+      }
+    ],
+    "unpriced_readers": []
+  },
+  "estimability": {
+    "cells_per_scale": {
+      "M": 18,
+      "S": 18
+    },
+    "collision_free": true,
+    "crossing_complete": true,
+    "degeneracy_fraction": {},
+    "estimable": true,
+    "key_collisions": [],
+    "n_cells": 108,
+    "n_unique_keys": 108
+  },
+  "feasible_grid": {
+    "B_grid": [
+      128.0,
+      256.0,
+      512.0
+    ],
+    "K_grid": [
+      1,
+      2,
+      4
+    ],
+    "infeasible_KB_pairs": [
+      [
+        8,
+        512.0
+      ],
+      [
+        16,
+        256.0
+      ],
+      [
+        16,
+        512.0
+      ],
+      [
+        32,
+        128.0
+      ],
+      [
+        32,
+        256.0
+      ],
+      [
+        32,
+        512.0
+      ]
+    ],
+    "is_full_grid": false,
+    "mde_feasible_grid": {
+      "mde_log_odds": 0.0308,
+      "mde_pp_at_p30": 0.6507,
+      "mde_pp_at_p50": 0.7699,
+      "n_observations": 81000,
+      "n_reps_per_point": 30,
+      "power_at_mde": 0.8,
+      "powered": true,
+      "se_log_odds": 0.010976
+    },
+    "mde_inflation": 2.892,
+    "mde_nominal_grid": {
+      "mde_log_odds": 0.01065,
+      "mde_pp_at_p30": 0.2241,
+      "mde_pp_at_p50": 0.2662,
+      "n_observations": 162000,
+      "n_reps_per_point": 30,
+      "power_at_mde": 0.7,
+      "powered": true,
+      "se_log_odds": 0.003739
+    },
+    "n_KB_pairs": 9,
+    "n_cells_effective": 54,
+    "n_observations_effective": 81000,
+    "why_primary_is_the_feasible_one": "The nominal MDE covers cells no reader can serve on this card. R9.12 refuses to compare readers over unequal K support, so the primary estimate is the one on the largest feasible rectangle."
+  },
+  "grid": {
+    "B_grid": [
+      {
+        "mode": "per_memory_tokens",
+        "value": 128.0
+      },
+      {
+        "mode": "per_memory_tokens",
+        "value": 256.0
+      },
+      {
+        "mode": "per_memory_tokens",
+        "value": 512.0
+      }
+    ],
+    "K_grid": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "cells_dropped_for_vram": 54,
+    "grid_effective_B": [
+      128.0,
+      256.0,
+      512.0
+    ],
+    "grid_effective_K": [
+      1,
+      2,
+      4
+    ],
+    "items_per_cell": 500,
+    "n_cells": 108,
+    "n_cells_effective": 54,
+    "n_cells_nominal": 108,
+    "n_observations": 81000,
+    "readers": [
+      "gemma",
+      "qwen",
+      "phi"
+    ],
+    "runs_per_cell": 3,
+    "scales": [
+      "S",
+      "M"
+    ]
+  },
+  "interaction": {
+    "mde_log_odds": 0.0308,
+    "mde_pp_at_p30": 0.6507,
+    "mde_pp_at_p50": 0.7699,
+    "n_observations": 81000,
+    "n_reps_per_point": 30,
+    "power_at_mde": 0.8,
+    "powered": true,
+    "se_log_odds": 0.010976
+  },
+  "judge_noise_sensitivity": [
+    {
+      "effect_attenuation": 1.0,
+      "interpretation": "perfect measurement — an upper bound, not a forecast",
+      "judge_flip": 0.0,
+      "mde_log_odds": 0.03677,
+      "mde_pp_at_p30": 0.7778,
+      "mde_pp_at_p50": 0.9191,
+      "n_observations": 81000,
+      "n_reps_per_point": 15,
+      "power_at_mde": 0.9333,
+      "powered": true,
+      "se_log_odds": 0.010972,
+      "sigma_run": 0.0
+    },
+    {
+      "effect_attenuation": 0.96,
+      "interpretation": "seed variance only; grader essentially exact",
+      "judge_flip": 0.02,
+      "mde_log_odds": 0.0394,
+      "mde_pp_at_p30": 0.8338,
+      "mde_pp_at_p50": 0.9849,
+      "n_observations": 81000,
+      "n_reps_per_point": 15,
+      "power_at_mde": 0.8,
+      "powered": true,
+      "se_log_odds": 0.010835,
+      "sigma_run": 0.3
+    },
+    {
+      "effect_attenuation": 0.88,
+      "interpretation": "mild grader disagreement",
+      "judge_flip": 0.06,
+      "mde_log_odds": 0.04303,
+      "mde_pp_at_p30": 0.9113,
+      "mde_pp_at_p50": 1.0756,
+      "n_observations": 81000,
+      "n_reps_per_point": 15,
+      "power_at_mde": 0.7333,
+      "powered": true,
+      "se_log_odds": 0.010562,
+      "sigma_run": 0.6
+    },
+    {
+      "effect_attenuation": 0.76,
+      "interpretation": "poor grader agreement (kappa ~ 0.118 territory, per 2511.02246)",
+      "judge_flip": 0.12,
+      "mde_log_odds": 0.05637,
+      "mde_pp_at_p30": 1.197,
+      "mde_pp_at_p50": 1.4089,
+      "n_observations": 81000,
+      "n_reps_per_point": 15,
+      "power_at_mde": 0.8,
+      "powered": true,
+      "se_log_odds": 0.01026,
+      "sigma_run": 1.0
+    }
+  ],
+  "main_effects": {
+    "corpus_fraction": {
+      "mde_log_odds": 14.5367,
+      "mde_pp_at_p50": 50.0,
+      "se_log_odds": 7.416807
+    },
+    "gold_rank": {
+      "mde_log_odds": 0.0151,
+      "mde_pp_at_p50": 0.3784,
+      "se_log_odds": 0.007722
+    },
+    "log2B": {
+      "mde_log_odds": 0.0178,
+      "mde_pp_at_p50": 0.4442,
+      "se_log_odds": 0.009066
+    },
+    "log2K": {
+      "mde_log_odds": 0.1463,
+      "mde_pp_at_p50": 3.6509,
+      "se_log_odds": 0.074642
+    },
+    "reader_strength": {
+      "mde_log_odds": 0.0947,
+      "mde_pp_at_p50": 2.3658,
+      "se_log_odds": 0.048318
+    }
+  },
+  "strata": {
+    "100": {
+      "mde_pp_at_p50": 17.51,
+      "n_items": 100,
+      "note": "Exploratory strata are reported descriptively. At n=30 the plain binomial SE is ~9pp (PRD §R9.9) but the minimum detectable effect at 80% power is ~28pp. A p-value quoted without these beside it is not interpretable.",
+      "se_pp": 5.0,
+      "se_pp_clustered": 6.25
+    },
+    "121": {
+      "mde_pp_at_p50": 15.92,
+      "n_items": 121,
+      "note": "Exploratory strata are reported descriptively. At n=30 the plain binomial SE is ~9pp (PRD §R9.9) but the minimum detectable effect at 80% power is ~28pp. A p-value quoted without these beside it is not interpretable.",
+      "se_pp": 4.55,
+      "se_pp_clustered": 5.68
+    },
+    "127": {
+      "mde_pp_at_p50": 15.54,
+      "n_items": 127,
+      "note": "Exploratory strata are reported descriptively. At n=30 the plain binomial SE is ~9pp (PRD §R9.9) but the minimum detectable effect at 80% power is ~28pp. A p-value quoted without these beside it is not interpretable.",
+      "se_pp": 4.44,
+      "se_pp_clustered": 5.55
+    },
+    "30": {
+      "mde_pp_at_p50": 31.97,
+      "n_items": 30,
+      "note": "Exploratory strata are reported descriptively. At n=30 the plain binomial SE is ~9pp (PRD §R9.9) but the minimum detectable effect at 80% power is ~28pp. A p-value quoted without these beside it is not interpretable.",
+      "se_pp": 9.13,
+      "se_pp_clustered": 11.41
+    },
+    "50": {
+      "mde_pp_at_p50": 24.76,
+      "n_items": 50,
+      "note": "Exploratory strata are reported descriptively. At n=30 the plain binomial SE is ~9pp (PRD §R9.9) but the minimum detectable effect at 80% power is ~28pp. A p-value quoted without these beside it is not interpretable.",
+      "se_pp": 7.07,
+      "se_pp_clustered": 8.84
+    },
+    "500": {
+      "mde_pp_at_p50": 7.83,
+      "n_items": 500,
+      "note": "Exploratory strata are reported descriptively. At n=30 the plain binomial SE is ~9pp (PRD §R9.9) but the minimum detectable effect at 80% power is ~28pp. A p-value quoted without these beside it is not interpretable.",
+      "se_pp": 2.24,
+      "se_pp_clustered": 2.8
+    }
+  },
+  "verdict": {
+    "binding_constraint": "Measurement quality, not sample size, is the binding constraint: the MDE degrades from 0.03677 to 0.05637 log-odds (1.5x) as grader misclassification rises from 0% to 12%. Buying more cells would not help; buying a better grader would.",
+    "budget": "BLOCKED",
+    "headline": "Interaction estimable: MDE = 0.0308 log-odds (0.7699 pp at p=0.5, 0.6507 pp at p=0.3). SE = 0.010976.",
+    "powered": true
+  }
+}

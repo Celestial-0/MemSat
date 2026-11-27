@@ -1,0 +1,18 @@
+readers.yaml:
+  families:
+    - id: gemma
+      version: 4ecc2ba63bcac23ba4a767fc87025b1450f84c9c
+      rationale: >-
+        Only local candidate with enough KV headroom to serve the deepest cells:
+        82 MB per 1k tokens gives a ~66k-token ceiling on the RTX 4060, against
+        ~20k for Qwen3.5-9B and ~44k for Phi. Note that the ORIGINAL config named a
+        12B checkpoint as primary on the theory that "stronger at long-context" is a
+        model-size property. It is not - it is a KV-cache-arithmetic property, and
+        the 12B variant is unusable on 8 GB. Cached-checkpoint exploratory pilot profile;
+        source revision verified from the local snapshot on 2026-11-24. GPU capacity in
+        this profile models resident language parameters; the 2.819B PLE table is mapped
+        read-only on CPU. Mixed-precision resident parameter/buffer bytes were measured
+        on 2026-11-24.
+      vram:
+        params_b: 4.699496746
+        bytes_per_param: 0.708522004368678

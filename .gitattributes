@@ -1,0 +1,28 @@
+# ── Byte-exact artifacts ─────────────────────────────────────────────────────
+# These are COMMITTED ARTIFACTS (PRD §R2.3, §R2.4, §G6). `msat ceiling --verify`
+# regenerates each one and compares it BYTE FOR BYTE against the committed file,
+# then exits non-zero on any difference. That is the right test, and it is
+# unpassable without this file.
+#
+# With no `.gitattributes`, git falls back to `core.autocrlf`. On Windows that
+# is `true` by default, so checkout rewrites LF -> CRLF and the working-tree
+# bytes stop matching the committed bytes. Measured on 2026-10-14, all three
+# artifacts, with identical content and zero real drift:
+#
+#     HEAD blob (LF)          14,483 B
+#     working tree (CRLF)     15,050 B   <- what --verify reads
+#     regenerated (LF)        14,466 B   <- what --verify compares against
+#
+# The 584-byte gap is the newline count, nothing else. `msat ceiling --verify`
+# therefore reports DRIFT at byte 1 on every artifact, forever, on Windows - and
+# a DRIFT report that is always red is worse than no report, because the next
+# real drift is invisible inside the noise.
+#
+# `-text` marks these as binary: git performs no conversion in either direction,
+# so the working tree holds exactly the committed bytes on every platform.
+# This is the right fix at the source rather than normalising inside the
+# comparator, which would hide the conversion instead of preventing it.
+msat/results/*.json -text
+msat/data.lock         -text
+
+# Everything else keeps normal handling; only byte-compared artifacts are pinned.

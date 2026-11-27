@@ -1,0 +1,98 @@
+{
+  "M": {
+    "arm_d_infeasible": true,
+    "corpus_tokens": 1209517,
+    "mean_session_tokens": 2541.0,
+    "note": "`full_context_max` keeps the most recent sessions up to each reader's VRAM ceiling. It is NOT full context and must never be reported as such: each reader holds a different number of sessions, so the three are three points on a curve, not replicates.",
+    "per_reader": {
+      "gemma": {
+        "ceiling": 66160,
+        "corpus_fraction": 0.0525,
+        "dropped_for_decode": 0,
+        "full_context": false,
+        "kept_tokens": 63525,
+        "mean_session_tokens": 2541.0,
+        "n_sessions_available": 476,
+        "n_sessions_kept": 25,
+        "reader": "gemma",
+        "reserve_tokens": 512,
+        "shortfall": 1143357
+      },
+      "phi": {
+        "ceiling": 44318,
+        "corpus_fraction": 0.0357,
+        "dropped_for_decode": 0,
+        "full_context": false,
+        "kept_tokens": 43197,
+        "mean_session_tokens": 2541.0,
+        "n_sessions_available": 476,
+        "n_sessions_kept": 17,
+        "reader": "phi",
+        "reserve_tokens": 512,
+        "shortfall": 1165199
+      },
+      "qwen": {
+        "ceiling": 20889,
+        "corpus_fraction": 0.0168,
+        "dropped_for_decode": 0,
+        "full_context": false,
+        "kept_tokens": 20328,
+        "mean_session_tokens": 2541.0,
+        "n_sessions_available": 476,
+        "n_sessions_kept": 8,
+        "reader": "qwen",
+        "reserve_tokens": 512,
+        "shortfall": 1188628
+      }
+    },
+    "sessions_median": 476.0
+  },
+  "S": {
+    "arm_d_infeasible": true,
+    "corpus_tokens": 122324,
+    "mean_session_tokens": 2548.4,
+    "note": "`full_context_max` keeps the most recent sessions up to each reader's VRAM ceiling. It is NOT full context and must never be reported as such: each reader holds a different number of sessions, so the three are three points on a curve, not replicates.",
+    "per_reader": {
+      "gemma": {
+        "ceiling": 66160,
+        "corpus_fraction": 0.5208,
+        "dropped_for_decode": 0,
+        "full_context": false,
+        "kept_tokens": 63710,
+        "mean_session_tokens": 2548.4,
+        "n_sessions_available": 48,
+        "n_sessions_kept": 25,
+        "reader": "gemma",
+        "reserve_tokens": 512,
+        "shortfall": 56164
+      },
+      "phi": {
+        "ceiling": 44318,
+        "corpus_fraction": 0.3542,
+        "dropped_for_decode": 0,
+        "full_context": false,
+        "kept_tokens": 43323,
+        "mean_session_tokens": 2548.4,
+        "n_sessions_available": 48,
+        "n_sessions_kept": 17,
+        "reader": "phi",
+        "reserve_tokens": 512,
+        "shortfall": 78006
+      },
+      "qwen": {
+        "ceiling": 20889,
+        "corpus_fraction": 0.1458,
+        "dropped_for_decode": 0,
+        "full_context": false,
+        "kept_tokens": 17838,
+        "mean_session_tokens": 2548.4,
+        "n_sessions_available": 48,
+        "n_sessions_kept": 7,
+        "reader": "qwen",
+        "reserve_tokens": 512,
+        "shortfall": 101435
+      }
+    },
+    "sessions_median": 48.0
+  }
+}

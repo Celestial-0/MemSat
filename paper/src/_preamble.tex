@@ -1,0 +1,91 @@
+% MemSat -- IEEE two-column conference format.
+%
+% LaTeX sources live under src/, next to Tectonic.toml at the project root.
+% `inputs` in Tectonic.toml are resolved RELATIVE TO src/ -- bare filenames,
+% no "src/" prefix. (Adding the prefix produces "File `src/index.tex' not
+% found", which is a double-prefix bug, not a Tectonic limitation.)
+%
+% Document is assembled by concatenating, in order:
+%     _preamble.tex  ->  index.tex  ->  _postamble.tex
+
+% FONT NOTE
+%
+% Tectonic runs XeTeX and this machine's fontconfig is broken ("Fontconfig
+% error: Cannot load default config file"), so fontspec cannot resolve system
+% font names such as "TeX Gyre Termes" -- it hard-errors. newtxtext/newtxmath
+% ship Times and the math faces as Type1 fonts inside the TeX tree instead, so
+% they need no fontconfig.
+%
+% These MUST be loaded after \documentclass. Loading them before fails: LaTeX
+% rejects \usepackage before \documentclass, and \RequirePackage before it fails
+% harder, because newtx pulls in xkeyval, which cannot load that early either.
+%
+% The cost of that ordering is ~47 "Font shape `TU/ptm/.../n' undefined"
+% warnings: IEEEtran selects the `ptm` family internally before newtx claims the
+% shapes. The warnings are benign. Verified in the output PDF -- the embedded
+% fonts are TeXGyreTermesX (text), TeXGyreTermesX-Italic (italic) and NewTXMI
+% (math), which is the Times IEEE specifies, not the Latin Modern fallback the
+% warnings describe.
+
+% IEEEtran IS the IEEE template: it supplies the two-column conference body,
+% \IEEEauthorblockN / \IEEEauthorblockA author metadata, \IEEEkeywords, and
+% IEEEtran.bst for the numeric reference list. No ARS-shipped LaTeX reference
+% covers IEEE (academic-paper/references/latex_template_reference.md ships
+% `article` and `apa7` only), so IEEEtran is the authority here.
+\documentclass[conference]{IEEEtran}
+
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}   % \mathbb{I}, \mathbb{E} -- amsmath alone does not provide these
+\usepackage{graphicx}
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+
+% Notation for the two crossed log-scale factors, defined once so the
+% interaction term cannot drift between abstract, model and estimator.
+\newcommand{\K}{\ensuremath{\log_2 K}}
+\newcommand{\B}{\ensuremath{\log_2 B}}
+
+\title{MemSat: Retrieval Depth and Context Budget\\in Conversational Memory}
+
+% Three authors forced into one row; at most four lines per author.
+\author{%
+\begin{minipage}{0.32\textwidth}\centering
+Yash Kumar Singh\\
+\scriptsize yashkumarsingh.work@gmail.com\\
+Dept.\ of Computer Science and Engineering\\
+Galgotias University, Greater Noida, India
+\end{minipage}\hfill
+\begin{minipage}{0.32\textwidth}\centering
+Shikhar Srivastava\\
+\scriptsize shikhar0718@gmail.com\\
+Dept.\ of Computer Science and Engineering\\
+Galgotias University, Greater Noida, India
+\end{minipage}\hfill
+\begin{minipage}{0.32\textwidth}\centering
+Millan Saxena\\
+\scriptsize milan.saxena@galgotiasuniversity.edu.in\\
+Asst.\ Prof., School of Computing Sc.\ \& Engg.\\
+Galgotias University, Greater Noida, India
+\end{minipage}}
+
+% hyperref loads last: IEEEtran warns when it is loaded earlier, and hidelinks
+% keeps the camera-ready look instead of colouring every citation.
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={MemSat: Retrieval Depth and Context Budget in Conversational Memory}}
+
+% IEEE-compliant float parameters (standard LaTeX float placement tuning)
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{6}
+\renewcommand{\topfraction}{0.98}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.9}
+\setlength{\textfloatsep}{4pt plus 1pt minus 1pt}
+\setlength{\floatsep}{4pt plus 1pt minus 1pt}
+\setlength{\intextsep}{4pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{2pt plus 1pt minus 1pt}
+\setlength{\belowcaptionskip}{2pt plus 1pt minus 1pt}
+
+\begin{document}

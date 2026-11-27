@@ -1,0 +1,39 @@
+{#
+  Arm C — isolates POSITION.
+
+  The retrieved SET is identical across all four orderings; only the order
+  changes. That is what makes the arm clean: any accuracy difference is
+  position, because count, content and length are all held fixed.
+
+  Balanced seeds across orderings, and gold-rank histograms emitted at every K
+  (PRD §R4.2).
+
+  The instruction to the model is deliberately IDENTICAL to Arm A's. Telling a
+  reader that the memories are reordered would introduce a second variable.
+#}
+system: |
+  You are answering a question about a conversation history. Use ONLY the
+  numbered memories provided. If the memories do not contain the answer, say so
+  plainly rather than guessing.
+
+user: |
+  {{ memories }}
+
+  Question: {{ question }}
+
+  Answer with the shortest span that answers the question. Do not explain.
+
+{#
+  Four orderings, applied to one fixed set. `order_policy` is carried on the
+  condition so the manifest records which variant produced which prompt:
+
+    rank        — retriever score order (the Arm A baseline ordering)
+    gold_first  — gold evidence promoted to the front
+    gold_last   — gold evidence pushed to the back
+    gold_center — gold evidence placed mid-context
+    reverse     — exact reverse of rank order
+
+  These are declared here rather than in `arms/c.py` so the arm's design is
+  readable without reading its implementation.
+#}
+order_policies: [rank, gold_first, gold_last, gold_center, reverse]

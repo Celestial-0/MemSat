@@ -1,0 +1,39 @@
+{#
+  Arm F — the GENERATION CEILING.
+
+  The official `_oracle` file: evidence-only sessions, nothing else. This is the
+  score a reader achieves when retrieval has already done its job perfectly, so
+  it bounds everything downstream.
+
+  It is free (no extra API calls beyond the model turn) and it answers the
+  question that separates two different failure modes:
+
+    Arm F >> Arm A  →  retrieval is binding. Better retrieval would help.
+    Arm F ~= Arm A  →  the WRITE PATH or the READER is binding, and no amount
+                      of retrieval tuning will move the number.
+
+  That distinction is worth the run. EvalMem measures retrieval failing 22.1% of
+  the time against encoding at 7.7% and generation at 6.5% — if our own write
+  path reproduces a similar split, the K-curve is dominated by a K-independent
+  constant and must be reported as one rather than as a saturation effect.
+
+  Unlike Arm E, this prompt DIFFERS from Arm A's: it carries no distractor
+  context at all, which is the entire point of the condition.
+#}
+system: |
+  You are answering a question about a conversation history. You are given the
+  exact sessions that contain the answer and nothing else. Answer directly.
+
+user: |
+  {{ memories }}
+
+  Question: {{ question }}
+
+  Answer with the shortest span that answers the question. Do not explain.
+
+source:
+  file: lme_oracle.json
+  # Measured in P1: 500 records, mean 1.9 sessions per question (min 1, max 6),
+  # against 47.7 on the S split. That 25x reduction in distractor context is the
+  # whole treatment.
+  expected_sessions_per_question: 1.9

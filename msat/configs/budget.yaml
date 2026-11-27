@@ -1,0 +1,45 @@
+# configs/budget.yaml - the ONE BudgetProfile in the repo (PRD §R1.3).
+#
+# Architecture §P2.4 deletes the competing K grids; this file is the
+# corresponding single definition for the B axis's RULES. The B LEVELS live in
+# `design.yaml`, next to `K_grid`, because K and B are one experimental design and
+# belong in one file. See `budget_source` below.
+#
+# ⚠️ THIS FILE PREVIOUSLY DECLARED ITS OWN `levels:` LIST, in `absolute_tokens`,
+# WHILE `design.yaml` DECLARED A DIFFERENT ONE IN `per_memory_tokens`. For a
+# period the repo held two B axes at once. Nothing caught it: the duplicate-grid
+# guard grepped for the literal key `B_grid` and this file used `levels`, so a
+# renamed key walked straight past it. The guard is now STRUCTURAL - it flags any
+# `{value, mode}` pair found outside design.yaml - and this model has no field to
+# restate the grid in. Removing the field is the fix; the guard is the safety net.
+#
+# To change the budget axis, edit `design.yaml` -> `B_grid`. That is the whole
+# instruction, and it is one line long on purpose.
+
+schema_version: 1
+
+# Applied to any level that does not state its own mode. Every level in
+# design.yaml states one, so this never fires for the shipped grid. It is the
+# fallback, NOT a description of the design's B axis.
+default_mode: per_memory_tokens
+
+# Where the levels are. Stated rather than implied so that anyone opening this
+# file looking for them is sent to the one place that owns them.
+budget_source: design.yaml
+
+enforcement:
+  # PRD §R3.4 - B-GUARD. A cell is degenerate if B >= tokens(corpus) FOR A
+  # QUESTION. Same per-question logic as the K-guard, applied to the second
+  # factor, and for the same reason: a corpus-wide percentile passes K=32 on a
+  # 40-session conversation while the condition is already full-context.
+  reject_cell_if_b_ge_corpus: true
+
+  # The per-question rule above is a CORPUS-size check. It is not sufficient on
+  # its own, because a cell can satisfy it and still not fit: the reader's VRAM
+  # ceiling for the prompt is smaller than the corpus for any reader on this
+  # hardware. `context_feasibility` therefore checks BOTH, and reports which one
+  # bound per cell.
+  #
+  # Checking only the corpus would have marked all 126 cells valid on 2026-10-13
+  # and then failed 14 of them during P5.
+  reject_cell_if_prompt_exceeds_reader_capacity: true

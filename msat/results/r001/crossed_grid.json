@@ -1,0 +1,54 @@
+{
+  "crossed": true,
+  "n_expected_cells": 108,
+  "n_planned_cells": 108,
+  "n_rejected_cells": 0,
+  "n_units": 0,
+  "per_scale_reader": {
+    "M/gemma": {
+      "complete": true,
+      "extra": [],
+      "missing": [],
+      "n_cells": 18,
+      "n_expected": 18
+    },
+    "M/phi": {
+      "complete": true,
+      "extra": [],
+      "missing": [],
+      "n_cells": 18,
+      "n_expected": 18
+    },
+    "M/qwen": {
+      "complete": true,
+      "extra": [],
+      "missing": [],
+      "n_cells": 18,
+      "n_expected": 18
+    },
+    "S/gemma": {
+      "complete": true,
+      "extra": [],
+      "missing": [],
+      "n_cells": 18,
+      "n_expected": 18
+    },
+    "S/phi": {
+      "complete": true,
+      "extra": [],
+      "missing": [],
+      "n_cells": 18,
+      "n_expected": 18
+    },
+    "S/qwen": {
+      "complete": true,
+      "extra": [],
+      "missing": [],
+      "n_cells": 18,
+      "n_expected": 18
+    }
+  },
+  "problems": [],
+  "reader_balanced": true,
+  "requirement": "PRD \u00a7R4.4 - arms A and G are ONE crossed grid"
+}

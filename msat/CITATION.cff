@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "msat — MemSat Experimental Harness"
+abstract: >-
+  An experimental harness that measures how answer accuracy and evidence recall
+  change as an LLM agent retrieves K memories under context budget B. The study
+  is a crossed K x B factorial: K and B are the swept factors, while the
+  embedder, chunking scheme, similarity metric, prompt, and gold position are
+  pinned, named, and hashed into every artifact. The primary result is the
+  estimated log2(K) x log2(B) interaction term, tested against a pre-registered
+  sign prediction. The harness also computes a retriever-independent analytical
+  recall ceiling directly from benchmark metadata at zero API cost.
+type: software
+version: 0.1.0
+date-released: "2026-10-12"
+license: MIT
+repository-code: "https://github.com/Celestial-0/MemSat"
+url: "https://github.com/Celestial-0/MemSat"
+keywords:
+  - long-term memory
+  - retrieval depth
+  - context budget
+  - interaction effect
+  - replication
+  - LongMemEval
+authors:
+  - name: "MemSat team"
+    website: "https://github.com/Celestial-0/MemSat"
+preferred-citation:
+  type: software
+  title: "msat — MemSat Experimental Harness"
+  year: 2026
+  version: 0.1.0
+  authors:
+    - name: "MemSat team"
+  license: MIT
+  repository-code: "https://github.com/Celestial-0/MemSat"
+notes: >-
+  This software is released alongside a pre-registration and a set of committed
+  zero-cost provenance artifacts (ceiling.json, corpus_fraction.json,
+  data.lock, power.json). The raw benchmarks it reads — LongMemEval and
+  LoCoMo — are separately licensed and are not redistributed here; data.lock
+  records their SHA-256 digests, byte sizes, and row counts so the committed
+  artifacts remain verifiable. An ethics review is required before any use of
+  LoCoMo, which contains real conversations and personal data.

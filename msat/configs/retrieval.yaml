@@ -1,0 +1,70 @@
+# configs/retrieval.yaml — the confounders, pinned, named, and hashed (PRD §R1.1).
+#
+# E, X and M are NOT swept. That is precisely why they must be written down: an
+# unnamed constant is a confound with tenure. Everything here lands in the
+# `config_hash` stamped on every artifact row, so no result can be attributed to
+# a retriever nobody can name.
+#
+# PRD §R1.1: NO FIELD MAY BE NULL. `validate-config` walks this file structurally
+# and exits 2 on any null — including ones a model's default would hide.
+
+schema_version: 1
+
+embedder:
+  id: sentence-transformers/all-MiniLM-L6-v2
+  # Exact revision, not a tag. A tag can be repointed, which would silently
+  # change the embedding space under a fixed config_hash.
+  version: "c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+  dimensionality: 384
+  # L2-normalised, so `cosine` and `dot` coincide and there is no hidden
+  # interaction between the normalisation choice and the similarity metric.
+  normalisation: l2
+  batch_size: 64
+  device: cuda
+  max_input_tokens: 512
+
+chunker:
+  id: session
+  # LongMemEval evidence is session-level. `unit` below must agree with this
+  # or the reported item count is uninterpretable (PRD §R1.6).
+  scheme: session
+  chunk_size_units: 1
+  overlap_units: 0
+
+similarity:
+  metric: cosine
+  # Scores tie constantly at small K on a 47.7-session corpus. An unspecified
+  # tie-break reorders exactly the cells under study, non-deterministically,
+  # and the resulting curve is not reproducible. Fixed, and recorded.
+  top_k_tie_break: lowest_session_id_ascending
+
+tokenizer:
+  # Pinned here because `tokens(corpus)` is the B-guard's input (PRD §R3.4) and
+  # B is swept in tokens. A token count computed with an unpinned tokenizer is not
+  # comparable across runs.
+  #
+  # ONE tokenizer for the whole study, and it is the PRIMARY READER'S. Two
+  # reasons, both about the B axis being meaningless otherwise:
+  #
+  #  1. B is defined in tokens. Two tokenizers make "16384 tokens" two different
+  #     quantities, so the log2(B) term stops meaning one thing across the grid
+  #     and the interaction is not interpretable.
+  #  2. The B-guard asks whether `B >= tokens(corpus)`. That comparison is only
+  #     meaningful against the tokenizer that will actually be asked to fit the
+  #     result. Counting with one tokenizer and generating with another makes the
+  #     guard a guess.
+  #
+  # The reader families use DIFFERENT tokenizers among themselves. That is fine,
+  # and part of why B is swept: each reader is shown the same *token budget*, and
+  # the differing tokenisations are a real source of the reader-strength effect
+  # R7.6 asks us to model. What must not vary is the token COUNTING used for the
+  # corpus statistics.
+  id: google/gemma-tokenizer
+  version: "UNCONFIRMED"  # -> the primary reader's exact revision; see B12
+  truncation: true
+  max_length: 8192
+
+# PRD §R1.6: `unit` is reported alongside BOTH items-retrieved and
+# tokens-retrieved in every metrics output, so results transfer across
+# granularities (session vs chunk vs fact).
+unit: session

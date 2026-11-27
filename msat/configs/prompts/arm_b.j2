@@ -1,0 +1,38 @@
+{#
+  Arm B — isolates COUNT vs LENGTH.
+
+  The padding is filler drawn from `5_filler_sess` ONLY, and the budget is
+  RELATIVE TO CORPUS (default 40%), never absolute: there is nothing outside the
+  corpus to pad beyond. Two hard assertions run alongside this template
+  (Phase 7):
+
+    1. the token target is hit within +/-2%;
+    2. the padding contains ZERO gold evidence.
+
+  Assertion 2 is not belt-and-braces. 2609.32269 showed that constructing
+  insufficient-evidence conditions by DELETING passages leaks the label through
+  memory size — a paragraph-counting classifier reaches AUROC 0.979 on MuSiQue.
+  `msat analyze` fits exactly that classifier from (memory size features ->
+  condition label) and FAILS THE ARM if it separates the conditions (PRD §R9.10).
+
+  The markers below are cosmetic for the model and load-bearing for the metrics:
+  padding is delimited so a coverage metric can never count it as evidence.
+#}
+system: |
+  You are answering a question about a conversation history. Use ONLY the
+  numbered memories provided. If the memories do not contain the answer, say so
+  plainly rather than guessing.
+
+user: |
+  {{ memories }}
+
+  Question: {{ question }}
+
+  Answer with the shortest span that answers the question. Do not explain.
+
+{#
+  Padding blocks are emitted between these markers, one per filler session, and
+  are flagged `is_padding: true` in the condition manifest (PRD §R4.2).
+#}
+padding_marker_open: "<<<PAD"
+padding_marker_close: "PAD>>>"

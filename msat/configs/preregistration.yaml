@@ -1,0 +1,78 @@
+# configs/preregistration.yaml — the pre-registered hypothesis (PRD §R0.4).
+#
+# Registered BEFORE data collection. `msat` computes and stores this file's
+# SHA-256 inside `results/power.json`, so the claim that the prediction was made
+# in advance rests on a hash pinned into the same artifact that reports the
+# estimate — not on a promise.
+#
+# IDEOLOGY 4 (Final_Idea.md): "A null is a result; a surprise null is a crisis."
+# The prediction below is ≈0, which is the reading most likely to produce a null.
+# Registering it in advance is what makes that null publishable rather than a
+# post-hoc rationalisation.
+
+schema_version: 1
+
+registered: "2026-10-12"
+registered_by: "MemSat team"
+status: pending_guide_signoff  # Architecture §P0: nothing is valid until signed
+
+primary_endpoint:
+  name: "K x B interaction"
+  term: "log2(K) * log2(B) in the primary mixed-effects model"
+  specification: "PRD §R9.1 — declared once, here and nowhere else"
+  family: single pre-registered endpoint; everything else is secondary
+
+# ── THE PRE-REGISTERED SIGN ────────────────────────────────────────────────────
+# Options were ≈0 / <0 / >0 (Final_Idea.md §1.3). The team selected:
+interaction_sign_prediction: approximately_zero
+direction: 0
+# The prediction is directional in the sense that a result of either sign would
+# be informative — but it is a specific, falsifiable claim: the coefficient is
+# expected to be indistinguishable from zero.
+#
+# Reading if confirmed (Final_Idea.md §1.3):
+#   "Utilisation depends on BUDGET ONLY. Count is irrelevant once length is fixed.
+#    Saturation is prompt assembly — the fix is reorder/budget, and it is free."
+sign_readings:
+  approximately_zero: >-
+    Utilisation depends on budget only; count is irrelevant once length is fixed.
+    Saturation is prompt assembly. The remedy is reordering or budgeting, and it
+    is free. This ALSO reproduces the OP-RAG finding (2409.01666, whose context
+    is 128 x k and therefore confounds count with length by construction) in a
+    domain where the two are separated.
+  negative: >-
+    More items at fixed length actively hurt. Would confirm G1 in agent memory
+    and reproduce 2503.04388 in a new domain.
+  positive: >-
+    More items help even at fixed length. Would contradict the context-cliff
+    story.
+
+# Why ≈0 rather than a directional guess. Recorded so the choice is auditable
+# rather than merely asserted.
+rationale: >-
+  The length/count confound is broken in this design by construction — Arm B holds
+  length fixed while count varies, and B is a swept factor rather than a constant.
+  Once length is controlled, the remaining channel for count to matter is purely
+  reader-side (more items dilute attention). 2503.04388 finds more documents at
+  fixed length costs -20%, but Qwen2.5 is immune to it, so the effect is
+  reader-dependent rather than universal — which is exactly what makes ≈0 the
+  honest prior and what makes the two-reader requirement (PRD §R7.5) decisive.
+
+# What is NOT predicted, and must not be claimed retroactively.
+not_claimed:
+  - "that the interaction is exactly zero — only that it is small relative to the MDE"
+  - "a retrieval-vs-utilization diagnostic (occupied: 2603.02473, 2605.24579, 2605.03675)"
+  - "that depth is a useful knob to tune — the depth-as-a-setting argument does not depend on this"
+
+# Secondary analyses, fixed in advance so Holm-Bonferroni has an enumerated family
+# (PRD §R9.7). Adding to this list after seeing results invalidates the correction.
+secondary_endpoints:
+  - "depth x scale interaction (G10) — descriptive if underpowered"
+  - "reader sign difference (R9.12)"
+  - "K_95 / K_knee / K_delta / Frontier K"
+  - "judge-reliability audit (R8.7)"
+
+# PRD §R9.7: the family is ENUMERATED here, not constructed after the fact.
+multiplicity:
+  method: holm_bonferroni
+  family_source: "this file"

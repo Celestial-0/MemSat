@@ -1,0 +1,57 @@
+name: Build Paper PDF
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-paper:
+    name: Compile manuscript with Tectonic
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Tectonic
+        run: |
+          curl -fsSL https://drop-sh.fullyjustified.net | sh
+          chmod +x tectonic
+          sudo mv tectonic /usr/local/bin/tectonic
+          tectonic --version
+
+      - name: Compile Paper
+        working-directory: paper
+        run: tectonic -X build
+
+      - name: Prepare MemSat.pdf
+        run: cp paper/build/MemSat/MemSat.pdf MemSat.pdf
+
+      - name: Upload Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MemSat.pdf
+          path: MemSat.pdf
+          if-no-files-found: error
+
+      - name: Publish PDF to GitHub Release
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "MemSat manuscript"
+          body: "Official MemSat manuscript build compiled from LaTeX with Tectonic."
+          files: MemSat.pdf
+          make_latest: true

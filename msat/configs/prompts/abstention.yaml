@@ -1,0 +1,72 @@
+# configs/prompts/abstention.yaml — the abstention scoring rule (PRD §R1.2).
+#
+# The benchmark marks an item abstention with the `_abs` suffix on
+# `question_id`. Measured in P1: 30 of 500 on both splits. Those items are
+# scored by the benchmark's OWN rule and are EXCLUDED from `recall@K`
+# (PRD §R8.4) — there is no evidence to retrieve, by construction — but they
+# STAY in end-to-end accuracy, because a system that confidently answers a
+# question whose evidence is absent is exactly the failure this benchmark
+# measures.
+#
+# The rule lives in config, not in code (PRD §R1.2), so changing the scoring
+# convention is a reviewable diff that shows up in the `config_hash` rather than
+# a silent behaviour change inside `metrics/`.
+
+schema_version: 1
+
+abstention:
+  suffix: "_abs"
+  detection: question_id_endswith_suffix
+
+  scoring:
+    # What counts as a correct abstention. A model that answers "I don't know"
+    # in 40 different phrasings must not silently become a 40% scorer on one
+    # rubric and a 0% on another — hence a declared match set.
+    correct_if_model_declines: true
+    decline_markers:
+      - "i don't know"
+      - "i do not know"
+      - "i'm not sure"
+      - "i am not sure"
+      - "insufficient information"
+      - "not mentioned"
+      - "not provided in the"
+      - "no information"
+      - "cannot be determined"
+      - "unknown"
+      - "there is no mention of"
+
+    # Declining is only rewarded if the model does NOT also volunteer a guess.
+    # An abstention that hedges with an answer is a wrong answer.
+    incorrect_if_model_also_guesses: true
+    guess_markers:
+      - "however, i think"
+      - "but it might be"
+      - "probably"
+      - "i would guess"
+      - "it is likely that"
+      - "my best guess"
+
+    # Optional target string. When `answer` is non-empty the model must decline
+    # AND must not name the target — the benchmark's abstention items name the
+    # session that would have held the answer, so a correct abstention is one
+    # that fails to retrieve it.
+    target_string: from_answer_field
+    incorrect_if_model_emits_target: true
+
+  reporting:
+    # PRD §R8.4 — reported separately, never pooled into a single accuracy that
+    # hides a 6%-of-the-benchmark regime behaving in the opposite direction.
+    separate_from_answerable: true
+    excluded_from_recall_at_k: true
+    included_in_end_to_end_accuracy: true
+    # A silent bias here is unacceptable, so the counts are surfaced on every
+    # metric table rather than inferred.
+    report_counts_always: true
+
+  # Measured in P1 and recorded so a future loader change that breaks this is
+  # caught immediately.
+  expected_split:
+    n_total: 500
+    n_answerable: 470
+    n_abstention: 30

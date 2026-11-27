@@ -1,0 +1,76 @@
+{
+  "branches": [
+    {
+      "branch": "(iv) K x B interaction estimable",
+      "detail": "NOT EVALUATED: no (K, B) conditions were checked (n_interaction_conditions=0). An empty degenerate list here means the estimability check never ran, not that it passed.",
+      "observed": {
+        "n_cells_checked": 0,
+        "n_conditions_checked": 0,
+        "n_degenerate_cells": 0,
+        "n_degenerate_conditions": 0
+      },
+      "passed": false,
+      "threshold": {
+        "max_degenerate_cells": 0,
+        "max_degenerate_conditions": 0,
+        "min_cells_checked": 1,
+        "min_conditions_checked": 1
+      }
+    },
+    {
+      "branch": "(i) accuracy varies >= 5pp",
+      "detail": "no accuracy data; branch cannot pass on absent input",
+      "observed": null,
+      "passed": false,
+      "threshold": {
+        "pp": 5.0
+      }
+    },
+    {
+      "branch": "(ii) recall@K varies >= 10pp",
+      "detail": "no recall data; branch cannot pass on absent input",
+      "observed": null,
+      "passed": false,
+      "threshold": {
+        "pp": 10.0
+      }
+    },
+    {
+      "branch": "(iii) stratified structure",
+      "detail": "not computed; a stratification that was not run cannot pass",
+      "observed": null,
+      "passed": false,
+      "threshold": {
+        "rule": "multi-session rising while single-session flat/declining"
+      }
+    }
+  ],
+  "config_hash": "6e0d61ebccd1c8d3a085ab015bcb76d2af3f18d9e786ef36230082b2e97a2d9b",
+  "context": "r_fast_final/full",
+  "degenerate_cells": [],
+  "degenerate_conditions": [],
+  "interaction_estimable": false,
+  "judge_floor_pp": 0.0,
+  "n_cells": 0,
+  "n_conditions": 0,
+  "n_interaction_cells": 0,
+  "n_interaction_conditions": 0,
+  "n_questions": 0,
+  "note": "A BOUNDED_NEGATIVE is a result, not a failure, and it is decided with the Guide IN ADVANCE (IMPLEMENTATION_PLAN.md \u00a76) rather than discovered after the budget is spent.",
+  "notes": [
+    "Branch (iv) did not pass. Branches (i)-(iii) below are reported for the record but cannot support a headline claim: an interaction estimated over a grid with holes in it - or not checked at all - is not the interaction this design declared.",
+    "Branch (i) had no accuracy data. A missing measurement is not a pass.",
+    "Branch (ii) had no recall data.",
+    "Full rung failed durable coverage."
+  ],
+  "outcome": "BOUNDED_NEGATIVE",
+  "passed_branches": [],
+  "pivot_if_negative": [
+    "ceiling analysis (already built)",
+    "stratification by question type (already built)",
+    "judge audit (P6)",
+    "cost model (P2)"
+  ],
+  "proceed": false,
+  "run_id": "r_fast_final"
+}

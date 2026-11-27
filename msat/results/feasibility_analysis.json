@@ -1,0 +1,1450 @@
+{
+  "anchors": {
+    "chars_per_token_assumed": 4.0,
+    "consistent": false,
+    "findings": [
+      {
+        "anchor": "prompt_tokens_at_K1",
+        "chars_per_session": 10178.8,
+        "corpus_chars_per_question": 4838071.0,
+        "declared": 2000.0,
+        "expected_from_measured_corpus": 2544.7,
+        "implied_corpus_tokens": 1209517.8,
+        "ok": true,
+        "ratio": 0.786,
+        "scale": "M",
+        "sessions_per_question": 475.31
+      },
+      {
+        "anchor": "prompt_tokens_at_K64",
+        "chars_per_session": 10178.8,
+        "corpus_chars_per_question": 4838071.0,
+        "declared": 120000.0,
+        "expected_from_measured_corpus": 162860.3,
+        "implied_corpus_tokens": 1209517.8,
+        "ok": true,
+        "ratio": 0.737,
+        "scale": "M",
+        "sessions_per_question": 475.31
+      },
+      {
+        "anchor": "prompt_tokens_at_K1",
+        "chars_per_session": 10250.5,
+        "corpus_chars_per_question": 489297.0,
+        "declared": 400.0,
+        "expected_from_measured_corpus": 2562.6,
+        "implied_corpus_tokens": 122324.2,
+        "ok": false,
+        "ratio": 0.156,
+        "scale": "S",
+        "sessions_per_question": 47.73
+      },
+      {
+        "anchor": "prompt_tokens_at_K64",
+        "chars_per_session": 10250.5,
+        "corpus_chars_per_question": 489297.0,
+        "declared": 12000.0,
+        "expected_from_measured_corpus": 122324.2,
+        "implied_corpus_tokens": 122324.2,
+        "ok": false,
+        "ratio": 0.098,
+        "scale": "S",
+        "sessions_per_question": 47.73
+      }
+    ],
+    "n_off": 2,
+    "verdict": "2 of 4 anchors are more than 2x off the corpus measured in P1. Feasibility and cost computed from them are wrong."
+  },
+  "comparison": [
+    {
+      "label": "PLACEHOLDER",
+      "n_infeasible": 5,
+      "n_redundant": 75,
+      "n_unique": 51,
+      "total_hours": 248.8
+    },
+    {
+      "label": "MEASURED (P1)",
+      "n_infeasible": 11,
+      "n_redundant": 78,
+      "n_unique": 48,
+      "total_hours": 292.5
+    }
+  ],
+  "compute": {
+    "assumptions": {
+      "batch_size": 8,
+      "decode_tokens_per_sec_aggregate": 300.0,
+      "dtype": "4bit",
+      "prefill_tokens_per_sec": 8000.0,
+      "status": "ASSUMED \u2014 must be benchmarked on the target machine before P5"
+    },
+    "available": true,
+    "judge_audit_hours": 87.5,
+    "judge_hours": 87.5,
+    "judge_share_of_total": 0.352,
+    "max_wall_clock_hours": 336.0,
+    "multiple_of_budget": 0.74,
+    "n_calls": 189000,
+    "per_reader": {
+      "Phi-4-mini-instruct": {
+        "calls": 63000,
+        "hours": 24.6
+      },
+      "Qwen3.5-9B": {
+        "calls": 63000,
+        "hours": 24.6
+      },
+      "gemma-4-E4B-it": {
+        "calls": 63000,
+        "hours": 24.6
+      }
+    },
+    "reader_hours": 73.8,
+    "total_days": 10.4,
+    "total_hours": 248.8,
+    "within_budget": true
+  },
+  "duplicates": {
+    "duplicate_sets": [
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "S"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          }
+        ],
+        "n_members": 5,
+        "n_redundant": 4
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "gemma-4-E4B-it",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          }
+        ],
+        "n_members": 5,
+        "n_redundant": 4
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Qwen3.5-9B",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 1,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 2,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      },
+      {
+        "members": [
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 4096,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          }
+        ],
+        "n_members": 5,
+        "n_redundant": 4
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 4,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 65536,
+            "B_mode": "absolute_tokens",
+            "K": 8,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          }
+        ],
+        "n_members": 2,
+        "n_redundant": 1
+      },
+      {
+        "members": [
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 16,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 32,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          },
+          {
+            "B": 16384,
+            "B_mode": "absolute_tokens",
+            "K": 64,
+            "arm": "A+G",
+            "reader": "Phi-4-mini-instruct",
+            "scale": "M"
+          }
+        ],
+        "n_members": 3,
+        "n_redundant": 2
+      }
+    ],
+    "n_cells": 126,
+    "n_duplicate_sets": 42,
+    "n_redundant_cells": 75,
+    "n_unique_conditions": 51,
+    "redundant_fraction": 0.5952,
+    "why_invisible": "Cell.key includes B, so cell_key_collisions() reports these grids as collision-free. The keys differ; the rendered prompt does not."
+  },
+  "feasibility": {
+    "infeasible_cells": {
+      "Phi-4-mini-instruct": [
+        {
+          "B": 65536,
+          "B_mode": "absolute_tokens",
+          "K": 32,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "ceiling": 44318,
+          "context_window": 131072,
+          "overflow_by": 16830,
+          "prompt_tokens": 61148,
+          "reader": "Phi-4-mini-instruct",
+          "scale": "M",
+          "vram_capacity_tokens": 44318
+        },
+        {
+          "B": 65536,
+          "B_mode": "absolute_tokens",
+          "K": 64,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "ceiling": 44318,
+          "context_window": 131072,
+          "overflow_by": 21718,
+          "prompt_tokens": 66036,
+          "reader": "Phi-4-mini-instruct",
+          "scale": "M",
+          "vram_capacity_tokens": 44318
+        }
+      ],
+      "Qwen3.5-9B": [
+        {
+          "B": 65536,
+          "B_mode": "absolute_tokens",
+          "K": 16,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "ceiling": 20889,
+          "context_window": 262144,
+          "overflow_by": 10263,
+          "prompt_tokens": 31152,
+          "reader": "Qwen3.5-9B",
+          "scale": "M",
+          "vram_capacity_tokens": 20889
+        },
+        {
+          "B": 65536,
+          "B_mode": "absolute_tokens",
+          "K": 32,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "ceiling": 20889,
+          "context_window": 262144,
+          "overflow_by": 40259,
+          "prompt_tokens": 61148,
+          "reader": "Qwen3.5-9B",
+          "scale": "M",
+          "vram_capacity_tokens": 20889
+        },
+        {
+          "B": 65536,
+          "B_mode": "absolute_tokens",
+          "K": 64,
+          "arm": "A+G",
+          "blocked_by": "vram",
+          "ceiling": 20889,
+          "context_window": 262144,
+          "overflow_by": 45147,
+          "prompt_tokens": 66036,
+          "reader": "Qwen3.5-9B",
+          "scale": "M",
+          "vram_capacity_tokens": 20889
+        }
+      ]
+    },
+    "n_infeasible": 5,
+    "policy": "reject_cell \u2014 never truncate silently (PRD \u00a7R3.2)",
+    "prompt_overhead_tokens": 500.0,
+    "readers": {
+      "Phi-4-mini-instruct": {
+        "blocked_by": "vram",
+        "ceiling": 44318,
+        "context_window": 131072,
+        "kv_mb_per_1k": 125.0,
+        "largest_prompt": 66036,
+        "vram_capacity_tokens": 44318,
+        "weight_gb": 2.09
+      },
+      "Qwen3.5-9B": {
+        "blocked_by": "vram",
+        "ceiling": 20889,
+        "context_window": 262144,
+        "kv_mb_per_1k": 125.0,
+        "largest_prompt": 66036,
+        "vram_capacity_tokens": 20889,
+        "weight_gb": 4.95
+      },
+      "gemma-4-E4B-it": {
+        "blocked_by": "vram",
+        "ceiling": 66160,
+        "context_window": 131072,
+        "kv_mb_per_1k": 82.03125,
+        "largest_prompt": 66036,
+        "vram_capacity_tokens": 66160,
+        "weight_gb": 2.2
+      }
+    }
+  },
+  "overhead_gb": 0.5,
+  "panel": {
+    "Phi-4-mini-instruct": {
+      "context_window": 131072,
+      "head_dim": 128,
+      "kv_heads": 8,
+      "layers": 32,
+      "params_b": 3.8,
+      "released": "2025-12-10",
+      "repo": "microsoft/Phi-4-mini-instruct",
+      "sha": "cfbefacb99257ffa30c83adab238a50856ac3083"
+    },
+    "Qwen3.5-9B": {
+      "context_window": 262144,
+      "head_dim": 256,
+      "kv_heads": 4,
+      "layers": 32,
+      "params_b": 9.0,
+      "released": "2026-03-02",
+      "repo": "Qwen/Qwen3.5-9B",
+      "sha": "c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+    },
+    "gemma-4-E4B-it": {
+      "context_window": 131072,
+      "head_dim": 256,
+      "kv_heads": 2,
+      "layers": 42,
+      "params_b": 4.0,
+      "released": "2026-07-20",
+      "repo": "google/gemma-4-E4B-it",
+      "sha": "ee0ef6023621cff504d758262d4e04895a5af4a2"
+    }
+  },
+  "vram_gb": 8.0
+}

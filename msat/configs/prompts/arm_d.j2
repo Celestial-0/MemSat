@@ -1,0 +1,35 @@
+{#
+  Arm D — isolates FULL CONTEXT.
+  The honesty control: does ANY K beat reading everything?
+
+  S ONLY. On M a conversation averages ~1.2M tokens (measured in P1: 4.84M
+  characters per M question), which is not runnable and is not comparable. A
+  budgeted-long-context variant on M is reported SEPARATELY and is NEVER pooled
+  with S's true full context — pooling them would average a real full-context
+  condition with a truncated one and produce a number that describes neither.
+
+  Truncation is from the MOST RECENT end, not the oldest: recency is the
+  confound that matters most in this benchmark, and dropping the oldest turns
+  "full context" into a recency experiment by accident.
+#}
+system: |
+  You are answering a question about a conversation history. Use ONLY the
+  memories provided. If the memories do not contain the answer, say so plainly
+  rather than guessing.
+
+user: |
+  {{ memories }}
+
+  Question: {{ question }}
+
+  Answer with the shortest span that answers the question. Do not explain.
+
+truncation:
+  from: most_recent
+  # Set per-scale and recorded on the condition:
+  #   S — true full context, no truncation.
+  #   M — budgeted variant, reported separately, never pooled with S.
+  scales:
+    S: full
+    M: budgeted
+  pooling_with_scale_S: false

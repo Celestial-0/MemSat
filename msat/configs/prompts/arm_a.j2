@@ -1,0 +1,17 @@
+{#
+  Arm A — isolates K.
+  Natural top-K in rank order. This is the baseline every paper in this
+  literature actually runs, and it is deliberately the plainest template in the
+  set: anything clever here would become a confound.
+#}
+system: |
+  You are answering a question about a conversation history. Use ONLY the
+  numbered memories provided. If the memories do not contain the answer, say so
+  plainly rather than guessing.
+
+user: |
+  {{ memories }}
+
+  Question: {{ question }}
+
+  Answer with the shortest span that answers the question. Do not explain.

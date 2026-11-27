@@ -1,0 +1,80 @@
+{
+  "_semantics": {
+    "n_gold_sessions": "|answer_session_ids|",
+    "n_records": "top-level records streamed",
+    "sessions_per_question": "per-question |haystack_session_ids| — the K-guard's input",
+    "tokens": "NOT REPORTED. Requires the tokenizer pinned in configs/retrieval.yaml (Phase 2). Only exact character counts are emitted — never an estimated token count presented as a measurement."
+  },
+  "scales": {
+    "M": {
+      "corpus_chars": {
+        "mean_per_question": 4838071,
+        "total": 2419035585
+      },
+      "gold_sessions": {
+        "distribution": {
+          "1": 176,
+          "2": 250,
+          "3": 41,
+          "4": 19,
+          "5": 11,
+          "6": 3
+        },
+        "max": 6,
+        "mean": 1.896
+      },
+      "n_abstention": 30,
+      "n_answerable": 470,
+      "n_records": 500,
+      "question_types": {
+        "knowledge-update": 78,
+        "multi-session": 133,
+        "single-session-assistant": 56,
+        "single-session-preference": 30,
+        "single-session-user": 70,
+        "temporal-reasoning": 133
+      },
+      "sessions_per_question": {
+        "max": 490,
+        "mean": 475.31,
+        "median": 476.0,
+        "min": 460
+      }
+    },
+    "S": {
+      "corpus_chars": {
+        "mean_per_question": 489297,
+        "total": 244648856
+      },
+      "gold_sessions": {
+        "distribution": {
+          "1": 176,
+          "2": 250,
+          "3": 41,
+          "4": 19,
+          "5": 11,
+          "6": 3
+        },
+        "max": 6,
+        "mean": 1.896
+      },
+      "n_abstention": 30,
+      "n_answerable": 470,
+      "n_records": 500,
+      "question_types": {
+        "knowledge-update": 78,
+        "multi-session": 133,
+        "single-session-assistant": 56,
+        "single-session-preference": 30,
+        "single-session-user": 70,
+        "temporal-reasoning": 133
+      },
+      "sessions_per_question": {
+        "max": 62,
+        "mean": 47.734,
+        "median": 48.0,
+        "min": 38
+      }
+    }
+  }
+}

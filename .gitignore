@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# LaTeX / Tectonic build artifacts
+paper/build/
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# Private research submodule (local only, not part of the public repo)
+Research/

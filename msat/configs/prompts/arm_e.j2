@@ -1,0 +1,67 @@
+{#
+  Arm E — NEGATIVE CONTROL.
+
+  Random memories from OTHER questions, count-matched to the Arm A condition so
+  that only the CONTENT differs. If this arm does not collapse, the pipeline is
+  broken and every other number is suspect.
+
+  PRD §G5 / §R4.3: Arm E runs FIRST in any smoke test, and the pass threshold is
+  a NUMBER — never "far below" — set from the P5 pilot and recorded here once
+  measured. A threshold that is not a number cannot be failed.
+
+  The prompt is byte-identical to Arm A's. If the control's template differed
+  from the treatment's, a collapse could be attributed to the template rather
+  than to the absence of evidence.
+#}
+system: |
+  You are answering a question about a conversation history. Use ONLY the
+  numbered memories provided. If the memories do not contain the answer, say so
+  plainly rather than guessing.
+
+user: |
+  {{ memories }}
+
+  Question: {{ question }}
+
+  Answer with the shortest span that answers the question. Do not explain.
+
+control:
+  match: count
+  source: other_questions
+  seed: 20261012
+  exclude_gold: true
+  exclude_overlap_with_target_question: true
+
+  # THRESHOLDS SET 2026-10-13. See `Research/context/24_open_decisions.md` D5.
+  #
+  # These two numbers are NOT the same kind of number, and that is the reason they
+  # differ by an order of magnitude.
+  #
+  # RECALL — a LEAK DETECTOR, not a performance bar.
+  #   recall@K asks whether a gold SESSION is among the rendered memories. Arm E's
+  #   memories are drawn from other questions with gold excluded, so this is 0 by
+  #   CONSTRUCTION: it is set overlap and does not care what the model says.
+  #
+  #   Verified that this does not leak: sessions ARE shared across haystacks (756
+  #   of 8,732 distinct sessions across 200 S questions appear in more than one),
+  #   so the question was real — but 0/199 other S questions and 0/79 other M
+  #   questions held a session that is gold for q0. Shared sessions are shared
+  #   DISTRACTORS; gold ids are question-scoped (`answer_280352e9`).
+  #
+  #   So 0.01 means "essentially zero". Any non-zero recall is a leak and must fail
+  #   the gate loudly.
+  pass_threshold_recall_below: 0.01
+
+  # ACCURACY — the genuine judgement call, because it will NOT be zero.
+  #   Two reasons: a ~9B model has parametric knowledge of some answers, and
+  #   token-F1 gives partial credit for overlapping tokens. So 0 is unreachable
+  #   and a threshold of 0 would be a gate that cannot pass.
+  #
+  #   Set A PRIORI, not from a pilot. A gate tuned on the data it is gating is not
+  #   a gate. Chosen to sit well above genuine parametric knowledge and well below
+  #   a pipeline that ignores context entirely — the latter scores near Arm A's
+  #   0.4-0.6 on this benchmark, so 0.15 fires with a wide margin either way.
+  #
+  #   It is a DETECTOR, not a target. The sweep needs it to catch a broken
+  #   pipeline; it does not need to be tight.
+  pass_threshold_accuracy_below: 0.15

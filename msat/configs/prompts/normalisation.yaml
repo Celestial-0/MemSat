@@ -1,0 +1,84 @@
+# configs/prompts/normalisation.yaml — the answer-normalisation function
+# (PRD §R1.2, §R8.1).
+#
+# "Own documented normalisation" is a PRD requirement for token-F1, which means
+# the normalisation must be DOCUMENTED and REPRODUCIBLE — so it is an ordered,
+# declarative list of steps in config, not a function buried in `metrics/f1.py`.
+#
+# Why declarative rather than a callable: a normaliser loaded from config is
+# auditable (you can read exactly what is stripped), reproducible (it is in the
+# `config_hash`), and cannot execute arbitrary code. Both requirements matter
+# more here than flexibility — EM and F1 are reported side by side with an
+# official model-based evaluator precisely because no single string metric is
+# trusted alone.
+#
+# ORDER IS SEMANTIC. Steps apply top to bottom. Removing articles before
+# lower-casing, or stripping punctuation before removing articles, changes the
+# result on exactly the items that are hardest to score.
+
+schema_version: 1
+
+normalisation:
+  # Applied to BOTH the model output and the gold answer before comparison.
+  apply_to: [prediction, gold]
+
+  steps:
+    - id: unicode_nfkc
+      op: unicode_normalise
+      form: NFKC
+      # Folds full-width characters and ligatures so a typographic difference
+      # is never scored as a semantic one.
+
+    - id: lowercase
+      op: lowercase
+
+    - id: strip_whitespace
+      op: strip
+
+    - id: collapse_whitespace
+      op: collapse_whitespace
+      replacement: " "
+
+    - id: remove_articles
+      op: regex_substitute
+      pattern: "\\b(a|an|the)\\b"
+      replacement: " "
+      flags: IGNORECASE
+      # Standard SQuAD-derived normalisation. Declared explicitly rather than
+      # inherited so that changing it is a visible, hashed change.
+
+    - id: remove_punctuation
+      op: regex_substitute
+      pattern: "[^\\w\\s]"
+      replacement: " "
+      flags: ""
+
+    - id: collapse_whitespace_again
+      op: collapse_whitespace
+      replacement: " "
+      # Punctuation removal leaves doubled spaces; without this, "hi, there"
+      # and "hi there" tokenise differently.
+
+    - id: strip
+      op: strip
+
+  # PRD §R8.1 — EM, token-F1 and the official model-based evaluator are reported
+  # SIDE BY SIDE everywhere, never one alone. A single string metric decides
+  # nothing; the judge panel and the human sample are what carry the result.
+  metrics:
+    exact_match:
+      enabled: true
+      note: "normalised strings must be identical"
+    token_f1:
+      enabled: true
+      note: "multiset token overlap on normalised strings; 0 if either is empty"
+    official_model_evaluator:
+      enabled: true
+      note: "PRD §R8.1 requires this alongside EM and F1"
+
+  # If the gold answer is a LIST, any single correct alternative scores 1.0.
+  # Verified during P1: `answer` is a bare string in the records observed so
+  # far, and the loader normalises a list to a tuple either way.
+  multi_gold:
+    strategy: any_match
+    note: "score is max over gold alternatives, not their mean"
